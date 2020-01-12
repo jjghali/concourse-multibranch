@@ -5,15 +5,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
-    "prepublish": "npm run build",
-    "dev": "ts-node src/index.ts",
-    "coverage": "npx -- nyc mocha --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit",
-    "coverage:junit": "npx -- nyc mocha --reporter mocha-junit-reporter --require ts-node/register 'test/**/*.test.ts' --reporter-options mochaFile=./coverage/test-results.xml --exit",
-    "test": "npx -- mocha --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit",
-    "test:junit": "npx -- mocha --reporter mocha-junit-reporter --require ts-node/register 'test/**/*.test.ts' --reporter-options mochaFile=./coverage/test-results.xml --exit",
-    "test:debug": "npx -- mocha --inspect-brk --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit"
+    "start": "nodemon --exec ts-node -- src/index.ts",
+    "ts-node": "ts-node src/index.ts",
+    "install-cli": "npm run build && cp package.json dist && npm install -g ./dist",
+    "uninstall-cli": "npm uninstall -g ccbranch"
   },
   "devDependencies": {
     "@types/chai": "^4.2.7",
@@ -24,10 +20,12 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.1",
     "@types/ora": "^3.2.0",
+    "@types/yargs": "^15.0.0",
     "chai": "^4.2.0",
     "dts-generator": "^3.0.0",
     "mocha": "^6.2.2",
     "mocha-junit-reporter": "^1.23.1",
+    "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
     "ts-node": "^8.5.4",
     "tsc-watch": "^4.0.0",
@@ -44,7 +42,8 @@
     "core-js": "^3.6.3",
     "inquirer": "^7.0.3",
     "ora": "^4.0.3",
-    "spawn-promise": "^0.1.8"
+    "spawn-promise": "^0.1.8",
+    "yargs": "^15.1.0"
   },
   "repository": {
     "type": "git",
@@ -53,7 +52,7 @@
   "author": "Joshua Ghali <joshua.ghali@gologic.ca>",
   "license": "ISC",
   "bin": {
-    "ccbranch": "./dist/index.js"
+    "ccbranch": "./index.js"
   },
   "bugs": {
     "url": "https://github.com/jjghali/concourse-multibranch/issues"
