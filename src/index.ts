@@ -4,30 +4,45 @@ import "./polyfills";
 
 import * as boxen from "boxen";
 import * as chalk from "chalk";
-import * as cmdr from "commander";
+import * as commander from "commander";
+const program = new commander.Command();
 
-cmdr.version("1.0.0").description("Concourse Multibranch generator");
+program
+	.storeOptionsAsProperties(false) // <--- change behaviour
+	.passCommandToAction(false); // <--- change behaviour
 
-cmdr.command("hello-world").description("Helloworld").action(() => {
+
+program.version("1.0.0").description("Concourse Multibranch generator");
+
+program.command("hello-world").description("Helloworld").action(() => {
 	console.log(chalk.yellow("=========*** Hello world! ***=========="));
 });
 
-cmdr.command("bitbucket-login").action(() => {
-	console.log("transform here");
-});
-cmdr.command("branch-available")
+program.command("bitbucket-login").alias('bl')
+	.option(
+		"-l <credentials>",
+		"--credentials <credentials>",
+		"Bitbucket credentials. It must me in this format: username:password.",
+	)
+	.action((options) => {
+		console.log("testoptions")
+		console.log(options.credentials);
+		console.log(options.l);
+	});
+
+program.command("branch-available")
 	.action(() => {
 		console.log("transform here");
 	});
 
-cmdr
+program
 	.command("generate-jobs")
 	.option(
 		"-l",
 		"--bitbucket-login <credentials>",
 		"Bitbucket credentials. It must me in this format: username:password.",
 	)
-	.option("-j", "--job-template <job-name>", "Name of the template job")``
+	.option("-j", "--job-template <job-name>", "Name of the template job")
 	.option("-P", "--project-name <project-name>", "Name of the project")
 	.option("-r", "--repo-slug", "Name of the repository")
 	.option("-i", "--pipeline-file", "Path of the YAML file.")
@@ -38,10 +53,5 @@ cmdr
 		console.log("transform here");
 	});
 
-// cmdr.if(!process.argv.slice(2).length /* || !/[arudl]/.test(process.argv.slice(2))*/);
-// {
-// 	cmdr.outputHelp();
-// 	process.exit();
-// }
 
-cmdr.parse(process.argv);
+program.parse(process.argv);

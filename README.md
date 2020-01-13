@@ -14,3 +14,4 @@ Concourse resource allowing mutliple branch to run on a specific pipeline
 
 - https://developer.okta.com/blog/2019/06/18/command-line-app-with-nodejs
 - https://codeburst.io/how-to-build-a-command-line-app-in-node-js-using-typescript-google-cloud-functions-and-firebase-4c13b1699a27
+- https://docs.atlassian.com/bitbucket-server/rest/6.9.1/bitbucket-branch-rest.html

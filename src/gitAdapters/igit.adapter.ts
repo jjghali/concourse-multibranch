@@ -1,3 +1,5 @@
-export interface IGitAdapter {
-  getBranches(): Promise<any>;
+interface IGitAdapter {
+  getBranches(): void;
 }
+
+export { IGitAdapter };

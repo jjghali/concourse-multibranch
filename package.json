@@ -34,6 +34,7 @@
     "typings": "^2.1.1"
   },
   "dependencies": {
+    "@types/yaml": "^1.2.0",
     "axios": "^0.19.1",
     "boxen": "^4.2.0",
     "chalk": "^3.0.0",
@@ -42,7 +43,9 @@
     "core-js": "^3.6.3",
     "inquirer": "^7.0.3",
     "ora": "^4.0.3",
+    "sha1": "^1.1.1",
     "spawn-promise": "^0.1.8",
+    "yaml": "^1.7.2",
     "yargs": "^15.1.0"
   },
   "repository": {
