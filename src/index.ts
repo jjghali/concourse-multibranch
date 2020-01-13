@@ -27,7 +27,7 @@ cmdr
 		"--bitbucket-login <credentials>",
 		"Bitbucket credentials. It must me in this format: username:password.",
 	)
-	.option("-j", "--job-template <job-name>", "Name of the template job")
+	.option("-j", "--job-template <job-name>", "Name of the template job")``
 	.option("-P", "--project-name <project-name>", "Name of the project")
 	.option("-r", "--repo-slug", "Name of the repository")
 	.option("-i", "--pipeline-file", "Path of the YAML file.")
