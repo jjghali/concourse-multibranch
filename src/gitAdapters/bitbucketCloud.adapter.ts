@@ -3,12 +3,12 @@ import axios from "axios";
 import { IGitAdapter } from "./igit.adapter";
 class BitbucketCloudAdapter {
 
-    private BITBUCKET_API: string = "https://api.bitbucket.org/2.0";
+    private static BITBUCKET_API: string = "https://api.bitbucket.org/2.0";
 
-    public getBranches(project: string, repoSlug: string, username: string, password: string): void {
+    public static getBranches(project: string, repoSlug: string, username: string, password: string): Promise<any> {
         const endpoint: string = "/repositories/" + project + "/" + repoSlug + "/refs/branches";
         const urlAPI: string = this.BITBUCKET_API + endpoint;
-        axios({
+        return axios({
             method: "get",
             url: urlAPI,
             auth: {
@@ -16,8 +16,12 @@ class BitbucketCloudAdapter {
                 password,
             },
         }).then((res) => {
-            console.log(res);
-        });
+            let branches: Array<string> = new Array<string>();
+            res.data.values.forEach((val: any) => {
+                branches.push(val.name);
+            });
+            return branches;
+        })
 
 
     }

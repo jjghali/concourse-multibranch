@@ -1,26 +1,28 @@
-import YAML from 'yaml'
-import sha1 from 'sha1';
 import BranchPipeline from './branchPipeline'
 
-class JobTransformer {
+const fs = require('fs');
+const sha1 = require('sha1');
+const YAML = require('yaml')
+const path = require('path');
+
+
+export class JobTransformer {
     private TEMPLATE_JOB_GROUP: string = 'templateJob';
     private BRANCHES_JOB_GROUP: string = 'branchesJobs';
 
     private parsedPipeline: any;
     private templateJob: any;
-    private gitResource: any;
-    private newPipelines: BranchPipeline[] = new Array<BranchPipeline>();
     private pipelineHash: string = "";
     private pipelineName: string = "";
-    private groups: any;
+    private gitResource: any;
 
-    constructor(pipeline: string, pipelineName: string, templateJobName: string) {
-        this.parsedPipeline = YAML.parse(pipeline);
-        this.pipelineName = pipelineName;
+    constructor(pipelineFilePath: string, templateJobName: string) {
+        const file = fs.readFileSync(pipelineFilePath, 'utf8');
+
+        this.parsedPipeline = YAML.parse(file);
+        this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
         this.getTemplateJob(templateJobName);
         this.getGitResource();
-        this.groups = new Array<any>();
-
     }
 
 
@@ -39,20 +41,31 @@ class JobTransformer {
         });
     }
 
-    private addJobsPerBranch(branches: string[]): void {
+    generatePipeline(branches: string[]): any {
         let newPipeline: BranchPipeline = new BranchPipeline();
 
         let resources: Array<any> = new Array<any>();
         let jobs: Array<any> = new Array<any>();
         let groups: Array<any> = this.initGroups();
 
+        jobs.push(this.templateJob);
+        let gitName = this.gitResource.name;
 
         branches.forEach((b) => {
-            let gitResourceNane: string = this.gitResource + '_' + b;
+            // for (let i = 0; i < branches.length; ++i) {
+            // let b = branches[i];
+            let gitResourceNane: string = ""
+
+            gitResourceNane += gitName;
+            gitResourceNane += '_' + b;
             let jobName = this.templateJob.name + "_" + b;
 
             let tempJob: any = this.createJobForBranch(gitResourceNane, jobName)
             let tempGitResource = this.createGitResourceForBranch(b, gitResourceNane);
+
+            // console.log(b)
+            console.log("resource=" + gitResourceNane);
+            console.log(gitName)
 
             jobs.push(tempJob);
             resources.push(tempGitResource);
@@ -60,7 +73,8 @@ class JobTransformer {
             groups.find((g) => {
                 return g.name == this.BRANCHES_JOB_GROUP;
             }).jobs.push(jobName);
-        });
+            gitResourceNane = "";
+        })
 
         let finalPipeline: any = this.finalizePipeline(resources, jobs, groups);
 
@@ -68,6 +82,8 @@ class JobTransformer {
             + "_" + this.pipelineHash;
         newPipeline.hash = this.pipelineHash;
         newPipeline.content = finalPipeline;
+
+        return finalPipeline;
     }
 
     private finalizePipeline(resources: any, jobs: any, groups: any): any {
@@ -92,14 +108,20 @@ class JobTransformer {
 
     private createJobForBranch(gitResourceNane: string, jobName: string): any {
         let tempJob: any = this.templateJob;
+        // let gitResource = this.getGitResource();
+        tempJob.name = jobName;
 
-        tempJob.name = jobName
-
-        tempJob.plan.find((p: any) => {
+        let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
             return p.get == this.gitResource.name;
-        }).get = gitResourceNane;
+        });
 
-        if (tempJob.plan.any((p: any) => {
+        let tmpjp = tempJob.plan[tempJobPlanIdx];
+        tmpjp.get = gitResourceNane;
+        tempJob.plan[tempJobPlanIdx] = tmpjp;
+
+        console.log(JSON.stringify(tempJob));
+
+        if (tempJob.plan.some((p: any) => {
             return p.put == this.gitResource.name;
         })) {
             tempJob.plan.find((p: any) => {
@@ -126,4 +148,3 @@ class JobTransformer {
 
 }
 
-export JobTransformer;

@@ -4,4 +4,3 @@ export default class BranchPipeline {
     public content: any;
 }
 
-// export default { BranchPipeline }
