@@ -1,4 +1,11 @@
 resources:
+  - name: github-sourcecode
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: master
+      username: jjghali
+  ***REMOVED***
   - name: git_branche2
     type: git
     source:

@@ -50,7 +50,7 @@ export class JobTransformer {
         let groups: Array<any> = this.initGroups();
 
         jobs.push(this.templateJob);
-
+        resources.push(this.gitResource);
 
         branches.forEach((b) => {
 
@@ -131,9 +131,9 @@ export class JobTransformer {
 
     private createGitResourceForBranch(branch: string, gitResourceName: string): any {
 
-        let tempGitResource = Object.assign({}, this.gitResource);
+        let tempGitResource = deepcopy<any>(this.gitResource);
         tempGitResource.name = gitResourceName;
-        tempGitResource.source = Object.assign({}, this.gitResource.source)
+        tempGitResource.source = deepcopy<any>(this.gitResource.source)
         tempGitResource.source.branch = branch;
         return tempGitResource;
     }
