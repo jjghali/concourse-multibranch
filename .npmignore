@@ -1,0 +1,16 @@
+.vscode/
+coverage
+.nyc_output
+examples/
+src/
+test/
+.gitignore
+.git/
+.nycrc
+Dockerfile
+
+*.yml
+*.yaml
+*.tgz
+tsconfig.json
+tslint.json
