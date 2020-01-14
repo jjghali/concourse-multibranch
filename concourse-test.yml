@@ -1,0 +1,19 @@
+resources:
+  - name: github-sourcecode
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: master    
+      username: jjghali
+  ***REMOVED***
+
+jobs:
+ 
+  - name: template
+    public: true
+    plan:
+    - get: github-sourcecode
+    - put: github-sourcecode
+         
+
+groups:
