@@ -19,17 +19,15 @@ program
 	.passCommandToAction(false); // <--- change behaviour
 
 
-program.version("1.0.0").description("Concourse Multibranch generator");
+program.version("1.0.0").description(
+	chalk.yellow("Concourse Multibranch generator"));
 
-program.command("hello-world")
-	.description("Helloworld")
+program.command("config")
+	.alias('cfg')
+	.description("Configures the app (NYI)")
 	.action(() => {
-		console.log(chalk.yellow("=========*** Hello world! ***=========="));
+
 	});
-
-program.command("config").action(() => {
-
-});
 
 program.command("branch-available")
 	.alias('ba')
