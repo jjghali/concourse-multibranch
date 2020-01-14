@@ -75,7 +75,6 @@ export class JobTransformer {
             + "_" + this.pipelineHash;
         newPipeline.hash = this.pipelineHash;
         newPipeline.content = finalPipeline;
-        console.log(YAML.stringify(finalPipeline, 'utf8'))
         return finalPipeline;
     }
 
