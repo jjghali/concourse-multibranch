@@ -7,10 +7,13 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon --exec ts-node -- src/index.ts",
-    "debug": "node --inspect-brk dist/index.js --debug-port=9229 hello-world",
+    "debug": "node --inspect dist/index.js --debug-port=9229 hello-world",
     "ts-node": "ts-node src/index.ts",
     "install-cli": "npm run build && cp package.json dist && npm install -g ./dist",
-    "uninstall-cli": "npm uninstall -g ccbranch"
+    "uninstall-cli": "npm uninstall -g ccbranch",
+    "test": "npx -- mocha --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit",
+    "test:junit": "npx -- mocha --reporter mocha-junit-reporter --require ts-node/register 'test/**/*.test.ts' --reporter-options mochaFile=./coverage/test-results.xml --exit",
+    "test:debug": "npx -- mocha --inspect-brk --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit"
   },
   "devDependencies": {
     "@types/chai": "^4.2.7",
@@ -43,11 +46,13 @@
     "child-process-promise": "^2.2.1",
     "commander": "^4.1.0",
     "core-js": "^3.6.3",
+    "deep-copy-ts": "^0.2.1",
     "fs": "0.0.1-security",
     "inquirer": "^7.0.3",
     "ora": "^4.0.3",
     "sha1": "^1.1.1",
     "spawn-promise": "^0.1.8",
+    "ts-deepcopy": "^0.1.4",
     "yaml": "^1.7.2",
     "yargs": "^15.1.0"
   },
