@@ -1,3 +1,6 @@
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch?ref=badge_small)
+
 # concourse-multibranch
 
 Concourse resource allowing mutliple branch to run on a specific pipeline
