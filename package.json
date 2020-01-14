@@ -61,7 +61,7 @@
   "author": "Joshua Ghali <joshua.ghali@gologic.ca>",
   "license": "ISC",
   "bin": {
-    "ccbranch": "./index.js"
+    "cmbranch": "dist/index.js"
   },
   "bugs": {
     "url": "https://github.com/jjghali/concourse-multibranch/issues"
