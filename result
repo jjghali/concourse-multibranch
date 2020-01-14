@@ -1,4 +1,11 @@
 resources:
+  - name: github-sourcecode
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: master
+      username: jjghali
+      password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
   - name: git_branche2
     type: git
     source:
