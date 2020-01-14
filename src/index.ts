@@ -8,6 +8,10 @@ import * as commander from "commander";
 import { BitbucketCloudAdapter } from './gitAdapters'
 import { JobTransformer } from './jobtranformer'
 
+const ora = require('ora');
+const YAML = require('yaml')
+const fs = require('fs');
+
 const program = new commander.Command();
 
 program
@@ -35,7 +39,7 @@ program.command("branch-available")
 		"username",
 	)
 	.requiredOption("-p,--password <password>", "password")
-	.requiredOption("-g,--git-provider <git-provider>", "bitbucketCloud")
+	.option("-g,--git-provider <git-provider>", "bitbucketCloud")
 	.requiredOption("-P,--project <project>", "project name")
 	.requiredOption("-r,--repo-slug <repo-slug>", "Name of the repository")
 	.action((opts) => {
@@ -59,25 +63,42 @@ program
 		"-u,--username <username>",
 		"username",
 	)
-	.option("-p,--password <password>", "password")
-	.option("-g,--git-provider <git-provider>", "bitbucketCloud")
-	.option("-j,--template <template>", "Name of the template job")
-	.option("-P,--project <project>", "Name of the project")
-	.option("-r,--repo-slug <repo-slug>", "Name of the repository")
-	.option("-i,--pipeline-file <pipeline-file>", "Path of the YAML file.")
+	.requiredOption("-p,--password <password>", "password")
+	.requiredOption("-j,--template <template>", "Name of the template job")
+	.requiredOption("-P,--project <project>", "Name of the project")
+	.requiredOption("-r,--repo-slug <repo-slug>", "Name of the repository")
+	.requiredOption("-i,--pipeline-file <pipeline-file>", "Path of the YAML file.")
 	.option("-O,--output-to-console", "Outputs the final YAML in the console")
-	.option("-f,--output-folder <output-folder>", "Output folder for the created yaml file")
+	.option("-q,--quiet", "No output on console")
+	.option("-f,--output-filename <output-filename>", "Output filename for the created yaml file")
 	.action((opts) => {
 		let promise: Promise<any> = BitbucketCloudAdapter.getBranches(opts.project, opts.repoSlug,
 			opts.username, opts.password);
 
 		promise.then((branches) => {
+
+
+
 			let filePath = opts.pipelineFile;
 			let templateName = opts.template;
 			let jobtranformer: JobTransformer = new JobTransformer(filePath, templateName);
 
 			let finalPipeline = jobtranformer.generatePipeline(branches);
+			let yamlPipeline = '---\n' + YAML.stringify(finalPipeline);
 
+			if (opts.outputToConsole && !opts.quiet) {
+				console.log(yamlPipeline);
+			}
+
+			if (opts.outputFilename) {
+				fs.writeFile(opts.outputFilename, yamlPipeline, (err: any) => {
+					if (err) {
+						return console.log(err);
+					}
+					if (!opts.quiet)
+						console.log("New pipeline can be found in " + chalk.blue(opts.outputFilename));
+				});
+			}
 
 		});
 	});
