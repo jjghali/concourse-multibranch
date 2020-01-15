@@ -75,7 +75,10 @@ export class JobTransformer {
             + "_" + this.pipelineHash;
         newPipeline.hash = this.pipelineHash;
         newPipeline.content = finalPipeline;
-        return finalPipeline;
+
+        newPipeline.hash = sha1(YAML.stringify(finalPipeline));
+
+        return newPipeline;
     }
 
     private finalizePipeline(resources: any, jobs: any, groups: any): any {

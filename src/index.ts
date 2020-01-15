@@ -7,6 +7,7 @@ import * as chalk from "chalk";
 import * as commander from "commander";
 import { BitbucketCloudAdapter } from './gitAdapters'
 import { JobTransformer } from './jobtranformer'
+import BranchPipeline from "./branchPipeline";
 
 const ora = require('ora');
 const YAML = require('yaml')
@@ -68,7 +69,7 @@ program
 	.requiredOption("-i,--pipeline-file <pipeline-file>", "Path of the YAML file.")
 	.option("-O,--output-to-console", "Outputs the final YAML in the console")
 	.option("-q,--quiet", "No output on console")
-	.option("-f,--output-filename <output-filename>", "Output filename for the created yaml file")
+	.option("-f,--output-filename <output-filename>", "Output filename for the generated yaml file")
 	.action((opts) => {
 		let promise: Promise<any> = BitbucketCloudAdapter.getBranches(opts.project, opts.repoSlug,
 			opts.username, opts.password);
@@ -81,10 +82,11 @@ program
 			let templateName = opts.template;
 			let jobtranformer: JobTransformer = new JobTransformer(filePath, templateName);
 
-			let finalPipeline = jobtranformer.generatePipeline(branches);
-			let yamlPipeline = '---\n' + YAML.stringify(finalPipeline);
+			let generatedPipeline: BranchPipeline = jobtranformer.generatePipeline(branches);
+			let yamlPipeline = "#hash: " + generatedPipeline.hash + '\n---\n' + YAML.stringify(generatedPipeline.content);
 
 			if (opts.outputToConsole && !opts.quiet) {
+				console.log("hash: " + generatedPipeline.hash)
 				console.log(yamlPipeline);
 			}
 
