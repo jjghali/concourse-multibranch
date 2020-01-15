@@ -142,15 +142,12 @@ export class JobTransformer {
         let entries = Object.entries(object);
         let result: Array<any> = new Array<any>();
 
-        for (let i = 0; i < entries.length; ++i) {
-            let e = entries[i];
+        entries.forEach((e: any) => {
             let sEntry = JSON.stringify(e).split(entry).join(newEntry);
             result.push(JSON.parse(sEntry));
-        }
-        console.log()
+        });
 
-        let objResult: any = deepcopy<any>(Object.create(result).__proto__);
-        return objResult;
+        return Object.create(result).__proto__;
     }
 }
 
