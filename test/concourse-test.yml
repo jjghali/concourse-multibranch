@@ -1,19 +1,32 @@
+---
 resources:
-  - name: github-sourcecode
-    type: git
-    source:
-      uri: https://github.com/jjghali/sga-backend.git
-      branch: master    
-      username: jjghali
-      password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
+
+- name: github-sourcecode
+  type: git
+  source:
+    uri: https://github.com/jjghali/sga-backend.git
+    branch: master    
+    username: jjghali
+    password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
+
+- name: cloud-foundry
+  type: cf
+  source:
+    api: https://api.run.pivotal.io
+    username: jjghali@protonmail.ch
+    password: owTjUkhz3dEyUk8@*ht_
+    organization: opbox
+    space: development
+
 
 jobs:
- 
-  - name: template
-    public: true
-    plan:
-    - get: github-sourcecode
-    - put: github-sourcecode
-       
-
-groups:
+- name: template
+  plan:
+  - get: github-sourcecode
+    trigger: true
+  # - task: build-app
+  #   file: github-sourcecode/concourse-ci/tasks/build.yml
+  - put: cloud-foundry
+    params:
+      manifest: github-sourcecode/manifest.yml
+      path: github-sourcecode
