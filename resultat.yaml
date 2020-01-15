@@ -1,0 +1,56 @@
+---
+resources:
+  - name: github-sourcecode
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: master
+      username: jjghali
+  ***REMOVED***
+  - name: git_branche2
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: branche2
+      username: jjghali
+  ***REMOVED***
+  - name: git_master
+    type: git
+    source:
+      uri: https://github.com/jjghali/sga-backend.git
+      branch: master
+      username: jjghali
+  ***REMOVED***
+jobs:
+  - name: template
+    plan:
+      - get: github-sourcecode
+        trigger: true
+      - put: cloud-foundry
+        params:
+          manifest: github-sourcecode/manifest.yml
+          path: github-sourcecode
+  - name: job_branche2
+    plan:
+      - get: git_branche2
+        trigger: true
+      - put: cloud-foundry
+        params:
+          manifest: github-sourcecode/manifest.yml
+          path: github-sourcecode
+  - name: job_master
+    plan:
+      - get: git_master
+        trigger: true
+      - put: cloud-foundry
+        params:
+          manifest: github-sourcecode/manifest.yml
+          path: github-sourcecode
+groups:
+  - name: templateJob
+    jobs:
+      - template
+  - name: branchesJobs
+    jobs:
+      - job_branche2
+      - job_master
