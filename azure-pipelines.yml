@@ -19,7 +19,7 @@ steps:
 - task: Docker@2
   inputs:
     containerRegistry: 'Docker hub - GoLogic'
-    repository: 'concourse-multibranch'
+    repository: 'joshuaghaligologic/concourse-multibranch'
     command: 'buildAndPush'
     Dockerfile: 'Dockerfile'
   displayName: 'Build and publish image'
