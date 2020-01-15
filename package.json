@@ -29,15 +29,12 @@
     "@types/yaml": "^1.2.0",
     "chai": "^4.2.0",
     "dts-generator": "^3.0.0",
-    "mocha": "^6.2.2",
-    "mocha-junit-reporter": "^1.23.1",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
     "ts-node": "^8.5.4",
     "tsc-watch": "^4.0.0",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.4",
-    "typings": "^2.1.1"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
     "ansi-escapes": "^4.3.0",
