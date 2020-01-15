@@ -1,19 +1,32 @@
+---
 resources:
-  - name: github-sourcecode
-    type: git
-    source:
-      uri: https://github.com/jjghali/sga-backend.git
-      branch: master    
-      username: jjghali
-  ***REMOVED***
+
+- name: github-sourcecode
+  type: git
+  source:
+    uri: https://github.com/jjghali/sga-backend.git
+    branch: master    
+    username: jjghali
+***REMOVED***
+
+- name: cloud-foundry
+  type: cf
+  source:
+***REMOVED***
+***REMOVED***
+***REMOVED***
+***REMOVED***
+***REMOVED***
+
 
 jobs:
- 
-  - name: template
-    public: true
-    plan:
-    - get: github-sourcecode
-    - put: github-sourcecode
-       
-
-groups:
+- name: template
+  plan:
+  - get: github-sourcecode
+    trigger: true
+  # - task: build-app
+  #   file: github-sourcecode/concourse-ci/tasks/build.yml
+  - put: cloud-foundry
+    params:
+      manifest: github-sourcecode/manifest.yml
+      path: github-sourcecode
