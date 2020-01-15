@@ -99,10 +99,11 @@ export class JobTransformer {
     }
 
     private createJobForBranch(branch: string): any {
-
         let tempJob: any = deepcopy<any>(this.templateJob);
         let gitResourceName: string = "git_" + branch
         tempJob.name = "job_" + branch;
+
+        tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
 
         let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
             return p.get == this.gitResource.name;
@@ -137,6 +138,19 @@ export class JobTransformer {
         return tempGitResource;
     }
 
+    private replace(entry: string, newEntry: string, object: Object): any {
+        let entries = Object.entries(object);
+        let result: Array<any> = new Array<any>();
 
+        for (let i = 0; i < entries.length; ++i) {
+            let e = entries[i];
+            let sEntry = JSON.stringify(e).split(entry).join(newEntry);
+            result.push(JSON.parse(sEntry));
+        }
+        console.log()
+
+        let objResult: any = deepcopy<any>(Object.create(result).__proto__);
+        return objResult;
+    }
 }
 
