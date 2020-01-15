@@ -36,16 +36,16 @@ jobs:
         trigger: true
       - put: cloud-foundry
         params:
-          manifest: github-sourcecode/manifest.yml
-          path: github-sourcecode
+          manifest: git_branche2/manifest.yml
+          path: git_branche2
   - name: job_master
     plan:
       - get: git_master
         trigger: true
       - put: cloud-foundry
         params:
-          manifest: github-sourcecode/manifest.yml
-          path: github-sourcecode
+          manifest: git_master/manifest.yml
+          path: git_master
 groups:
   - name: templateJob
     jobs:

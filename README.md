@@ -1,11 +1,50 @@
+# concourse-multibranch
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch?ref=badge_small)
 
-# concourse-multibranch
+## Introduction
+Concourse resource allowing mutliple branch to run on a specific pipeline. The application is made in TypeScript.
 
-Concourse resource allowing mutliple branch to run on a specific pipeline
+## Setup 
 
-## used packages
+### Build the app
+```bash
+$ npm install
+$ npm run build
+```
+
+### Install the CLI locally
+```bash
+$ npm install-cli
+```
+> Note: In linux you will need to run the command in sudo if you wish to be able to run it from anywhere
+
+## Using it
+### Help
+```bash
+$ cmbranch help
+```
+### Branches available in Bitbucket
+```bash
+$ cmbranch branch-available -u <username> -p <password> --project <project-name> -r <repo-slug>
+```
+or
+```bash
+$ cmbranch ba -u <username> -p <password> --project <project-name> -r <repo-slug>
+```
+
+### Generate a new pipeline with a job per branch
+```bash
+$ cmbranch generate-pipeline -u <username> -p <password> --project <project-name> --repo-slug <repo-slug> --pipeline-file <pipeline-file> --output-filename <output-filename>
+```
+Other options exists and you can look at them by using the following command.
+
+```bash
+$ cmbranch generate-pipeline --help
+```
+
+
+### Used packages
 
 - https://www.npmjs.com/package/commander
 - https://www.npmjs.com/package/inquirer

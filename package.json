@@ -16,6 +16,7 @@
     "test:debug": "npx -- mocha --inspect-brk --reporter spec --require ts-node/register 'test/**/*.test.ts' --exit"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.8.3",
     "@types/chai": "^4.2.7",
     "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",
@@ -39,6 +40,7 @@
     "typings": "^2.1.1"
   },
   "dependencies": {
+    "ansi-escapes": "^4.3.0",
     "axios": "^0.19.1",
     "boxen": "^4.2.0",
     "chalk": "^3.0.0",
