@@ -16,12 +16,13 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: Build and publish image
+- task: Docker@2
   inputs:
     containerRegistry: 'Docker hub - GoLogic'
     repository: 'concourse-multibranch'
     command: 'buildAndPush'
     Dockerfile: 'Dockerfile'
+  displayName: 'Build and publish image'
 
 - task: Npm@1
   inputs:
