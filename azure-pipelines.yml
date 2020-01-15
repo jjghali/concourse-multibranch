@@ -1,4 +1,5 @@
 trigger:
+
 - master
 
 pool:
@@ -18,5 +19,11 @@ steps:
   inputs:
     command: 'publish'
     publishRegistry: 'useFeed'
-    publishFeed: '57187e27-75ab-4b5a-8db0-c87ad649aca8/ad8783ce-98d8-4668-a1ce-a7ccca03d4cb'
+    publishFeed: 'adf9280b-3287-467a-afb6-106826f0a236'
   displayName: 'Publish to NPM registry'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker hub - GoLogic'
+    repository: 'concourse-multibranch'
+    command: 'buildAndPush'
+    Dockerfile: 'Dockerfile'
