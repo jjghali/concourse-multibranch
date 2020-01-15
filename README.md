@@ -43,8 +43,24 @@ Other options exists and you can look at them by using the following command.
 $ cmbranch generate-pipeline --help
 ```
 
+### Using the Docker image with Docker compose
+```yaml
+version: '3.3'
 
-### Used packages
+services: 
+    concourse-multibranch:
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        
+        environment:
+            cmbCommand: gp --help           
+                
+```
+
+
+
+## Used packages
 
 - https://www.npmjs.com/package/commander
 - https://www.npmjs.com/package/inquirer
