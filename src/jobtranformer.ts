@@ -102,7 +102,6 @@ export class JobTransformer {
         let tempJob: any = deepcopy<any>(this.templateJob);
         let gitResourceName: string = "git_" + branch
         tempJob.name = "job_" + branch;
-
         tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
 
         let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
@@ -148,7 +147,7 @@ export class JobTransformer {
             result.push(JSON.parse(sEntry));
         });
 
-        return Object.create(result).__proto__;
+        return Object.fromEntries(result);
     }
 }
 
