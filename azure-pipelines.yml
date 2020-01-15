@@ -15,15 +15,17 @@ steps:
     npm install
     npm run build
   displayName: 'npm install and build'
+
+- task: Build and publish image
+  inputs:
+    containerRegistry: 'Docker hub - GoLogic'
+    repository: 'concourse-multibranch'
+    command: 'buildAndPush'
+    Dockerfile: 'Dockerfile'
+
 - task: Npm@1
   inputs:
     command: 'publish'
     publishRegistry: 'useFeed'
     publishFeed: 'adf9280b-3287-467a-afb6-106826f0a236'
   displayName: 'Publish to NPM registry'
-- task: Docker@2
-  inputs:
-    containerRegistry: 'Docker hub - GoLogic'
-    repository: 'concourse-multibranch'
-    command: 'buildAndPush'
-    Dockerfile: 'Dockerfile'
