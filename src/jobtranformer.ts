@@ -141,9 +141,10 @@ export class JobTransformer {
     private replace(entry: string, newEntry: string, object: Object): any {
         let entries = Object.entries(object);
         let result: Array<any> = new Array<any>();
+        let sEntry: any;
 
         entries.forEach((e: any) => {
-            let sEntry = JSON.stringify(e).split(entry).join(newEntry);
+            sEntry = JSON.stringify(e).split(entry).join(newEntry);
             result.push(JSON.parse(sEntry));
         });
 
