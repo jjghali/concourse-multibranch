@@ -1,0 +1,57 @@
+---
+resources:
+
+- name: sourcecode
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/jjghali/sga-backend.git
+    branch: concourse-ci
+    username: jjghali
+    password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
+
+- name: docker-registry
+  type: docker-image
+  icon: docker
+  source:
+    repository: froggy-docker.jfrog.io/concourse-multibranch
+    tag: test
+    username: admin
+    password: Rm8Oc1Xy2Qn2Fy
+    
+
+
+jobs:
+  - name: build-app    
+    plan:
+      - get: sourcecode
+        trigger: true
+      - task: build-node-app        
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: node, tag: "10" }
+          inputs:
+            - name: sourcecode
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                cd sourcecode
+                npm install
+                npm run build
+                npm publish . --tag test
+          outputs:
+          - name: artifact
+            path: sourcecode/dist
+      
+  - name: build-docker-image
+    serial: true
+    plan:
+      - get: sourcecode
+        trigger: true
+      - put: docker-registry
+        params:
+          build: sourcecode
