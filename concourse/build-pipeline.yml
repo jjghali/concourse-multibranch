@@ -19,15 +19,6 @@ resources:
     username: admin
     password: Rm8Oc1Xy2Qn2Fy
 
-- name: npm-registry
-  type: npm
-  icon: npm
-  source:
-    package: cmbranch-cli
-    username: admin
-    registry: https://froggy.jfrog.io/froggy/api/npm/npm/
-    token: YWRtaW46QVA2bk1GM1RCdDRrQ2J5dlRKVjNLUnZ0dzl1
-
 resource_types:
 - name: npm
   type: docker-image
@@ -52,16 +43,19 @@ jobs:
             args:
               - -c
               - |
+                echo '_auth = YWRtaW46QVA2bk1GM1RCdDRrQ2J5dlRKVjNLUnZ0dzl1
+                      email = joshua.ghali@gologic.ca
+                      always-auth = true' > ~/.npmrc
                 cd sourcecode
+                npm config set registry https://froggy.jfrog.io/froggy/api/npm/npm/
                 npm install
                 npm run build            
+
           outputs:
           - name: artifact
             path: sourcecode/dist
           
-      - put: npm-registry
-        params:
-          path: sourcecode
+     
       
   - name: build-docker-image
     serial: true
