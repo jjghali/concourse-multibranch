@@ -3,62 +3,89 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjjghali%2Fconcourse-multibranch?ref=badge_small)
 
 ## Introduction
+
 Concourse resource allowing mutliple branch to run on a specific pipeline. The application is made in TypeScript.
 
-## Setup 
+## Setup
 
 ### Build the app
+
 ```bash
 $ npm install
 $ npm run build
 ```
 
 ### Install the CLI locally
+
 ```bash
 $ npm install-cli
 ```
+
 > Note: In linux you will need to run the command in sudo if you wish to be able to run it from anywhere
 
 ## Using it
+
 ### Help
+
 ```bash
 $ cmbranch help
 ```
+
 ### Branches available in Bitbucket
+
 ```bash
 $ cmbranch branch-available -u <username> -p <password> --project <project-name> -r <repo-slug>
 ```
+
 or
+
 ```bash
 $ cmbranch ba -u <username> -p <password> --project <project-name> -r <repo-slug>
 ```
 
 ### Generate a new pipeline with a job per branch
+
 ```bash
 $ cmbranch generate-pipeline -u <username> -p <password> --project <project-name> --repo-slug <repo-slug> --pipeline-file <pipeline-file> --output-filename <output-filename>
 ```
+
 Other options exists and you can look at them by using the following command.
 
 ```bash
 $ cmbranch generate-pipeline --help
 ```
 
-### Using the Docker image with Docker compose
-```yaml
-version: '3.3'
+### When usgin Bitbucket credentials stored in Environment variables
 
-services: 
-    concourse-multibranch:
-        build: 
-            context: .
-            dockerfile: Dockerfile
-        
-        environment:
-            cmbCommand: gp --help           
-                
+Nodejs is not able to get environment variables stored in the system. In order to bypass this limitation you will need to generate the dotenv file before running the app by running the following command:
+
+```bash
+$ sh retrieveCredentials.sh
 ```
 
+It will produce a dotenv file similar to this one.
 
+```bash
+BITBUCKET_USERNAME=username
+BITBUCKET_PASSWORD=password or deploy key
+```
+
+After that you will be able to run the app without putting the credentials in the arguments.
+
+### Using the Docker image with Docker compose
+
+```yaml
+version: "3.3"
+
+services:
+  concourse-multibranch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      cmbCommand: gp --help
+```
 
 ## Used packages
 
@@ -67,7 +94,6 @@ services:
 - https://www.npmjs.com/package/core-js
 - https://www.npmjs.com/package/ora
 - https://www.npmjs.com/package/axios
-
 
 ## References
 
