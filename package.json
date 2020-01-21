@@ -44,6 +44,7 @@
     "child-process-promise": "^2.2.1",
     "commander": "^4.1.0",
     "core-js": "^3.6.3",
+    "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "inquirer": "^7.0.3",
     "ora": "^4.0.3",

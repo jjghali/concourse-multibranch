@@ -1,153 +1,153 @@
-import BranchPipeline from './branchPipeline'
+import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
 
-const fs = require('fs');
-const sha1 = require('sha1');
-const YAML = require('yaml')
-const path = require('path');
-
+const fs = require("fs");
+const sha1 = require("sha1");
+const YAML = require("yaml");
+const path = require("path");
 
 export class JobTransformer {
-    private TEMPLATE_JOB_GROUP: string = 'templateJob';
-    private BRANCHES_JOB_GROUP: string = 'branchesJobs';
+  private TEMPLATE_JOB_GROUP: string = "templateJob";
+  private BRANCHES_JOB_GROUP: string = "branchesJobs";
 
-    private parsedPipeline: any;
-    private templateJob: any;
-    private pipelineHash: string = "";
-    private pipelineName: string = "";
-    private gitResource: any;
+  private parsedPipeline: any;
+  private templateJob: any;
+  private pipelineHash: string = "";
+  private pipelineName: string = "";
+  private gitResource: any;
 
-    constructor(pipelineFilePath: string, templateJobName: string) {
-        const file = fs.readFileSync(pipelineFilePath, 'utf8');
+  constructor(pipelineFilePath: string, templateJobName: string) {
+    const file = fs.readFileSync(pipelineFilePath, "utf8");
 
-        this.parsedPipeline = YAML.parse(file);
-        this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
-        this.getTemplateJob(templateJobName);
-        this.getGitResource();
-    }
+    this.parsedPipeline = YAML.parse(file);
+    this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
+    this.getTemplateJob(templateJobName);
+    this.getGitResource();
+  }
 
+  private getTemplateJob(templateJobName: string): void {
+    this.templateJob = this.parsedPipeline.jobs.find((i: any) => {
+      if (templateJobName != "") return i.name == templateJobName;
+      else return i.name.includes("template");
+    });
+  }
 
-    private getTemplateJob(templateJobName: string): void {
-        this.templateJob = this.parsedPipeline.jobs.find((i: any) => {
-            if (templateJobName != "")
-                return i.name == templateJobName;
-            else
-                return i.name.includes('template');
-        });
-    }
+  private getGitResource(): void {
+    this.gitResource = this.parsedPipeline.resources.find((r: any) => {
+      return r.type == "git" && r.source.branch == "master";
+    });
+  }
 
-    private getGitResource(): void {
-        this.gitResource = this.parsedPipeline.resources.find((r: any) => {
-            return r.type == 'git' && r.source.branch == 'master';
-        });
-    }
+  generatePipeline(branches: string[]): any {
+    let newPipeline: BranchPipeline = new BranchPipeline();
 
-    generatePipeline(branches: string[]): any {
-        let newPipeline: BranchPipeline = new BranchPipeline();
+    let resources: Array<any> = new Array<any>();
+    let jobs: Array<any> = new Array<any>();
+    let groups: Array<any> = this.initGroups();
 
-        let resources: Array<any> = new Array<any>();
-        let jobs: Array<any> = new Array<any>();
-        let groups: Array<any> = this.initGroups();
+    jobs.push(this.templateJob);
+    resources.push(this.gitResource);
 
-        jobs.push(this.templateJob);
-        resources.push(this.gitResource);
+    branches.forEach(b => {
+      let gitResourceNane: string = "git_" + b;
+      let jobName = "job_" + b;
 
-        branches.forEach((b) => {
+      let tempJob: any = this.createJobForBranch(b);
+      let tempGitResource = this.createGitResourceForBranch(b, gitResourceNane);
 
-            let gitResourceNane: string = 'git_' + b;
-            let jobName = "job_" + b;
+      jobs.push(tempJob);
+      resources.push(tempGitResource);
 
-            let tempJob: any = this.createJobForBranch(b)
-            let tempGitResource = this.createGitResourceForBranch(b, gitResourceNane);
-
-            jobs.push(tempJob);
-            resources.push(tempGitResource);
-
-            groups.find((g) => {
-                return g.name == this.BRANCHES_JOB_GROUP;
-            }).jobs.push(jobName);
-
+      groups
+        .find(g => {
+          return g.name == this.BRANCHES_JOB_GROUP;
         })
+        .jobs.push(jobName);
+    });
 
-        let finalPipeline: any = this.finalizePipeline(resources, jobs, groups);
+    let finalPipeline: any = this.finalizePipeline(resources, jobs, groups);
 
-        newPipeline.name = this.pipelineName
-            + "_" + this.pipelineHash;
-        newPipeline.hash = this.pipelineHash;
-        newPipeline.content = finalPipeline;
-        return finalPipeline;
+    newPipeline.name = this.pipelineName + "_" + this.pipelineHash;
+    newPipeline.hash = this.pipelineHash;
+    newPipeline.content = finalPipeline;
+    return finalPipeline;
+  }
+
+  private finalizePipeline(resources: any, jobs: any, groups: any): any {
+    let pipeline: any = {
+      resources: resources,
+      jobs: jobs,
+      groups: groups
+    };
+    return pipeline;
+  }
+
+  private initGroups(): Array<any> {
+    let groups: Array<any> = new Array<any>();
+    let originalGroup: any = {
+      name: this.TEMPLATE_JOB_GROUP,
+      jobs: [this.templateJob.name]
+    };
+    let branchesJobGroup: any = { name: this.BRANCHES_JOB_GROUP, jobs: [] };
+
+    groups.push(originalGroup);
+    groups.push(branchesJobGroup);
+
+    return groups;
+  }
+
+  private createJobForBranch(branch: string): any {
+    let tempJob: any = deepcopy<any>(this.templateJob);
+    let gitResourceName: string = "git_" + branch;
+    tempJob.name = "job_" + branch;
+    tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
+
+    let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
+      return p.get == this.gitResource.name;
+    });
+
+    let tmpjp: any;
+
+    if (tempJobPlanIdx != -1) {
+      let tmpjp = tempJob.plan[tempJobPlanIdx];
+      tmpjp.get = gitResourceName;
+      tempJob.plan[tempJobPlanIdx] = tmpjp;
+    }
+    tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
+      return p.put == this.gitResource.name;
+    });
+    if (tempJobPlanIdx != -1) {
+      tmpjp = tempJob.plan[tempJobPlanIdx];
+      tmpjp.put = gitResourceName;
+      tempJob.plan[tempJobPlanIdx] = tmpjp;
     }
 
-    private finalizePipeline(resources: any, jobs: any, groups: any): any {
-        let pipeline: any = {
-            resources: resources,
-            jobs: jobs,
-            groups: groups
-        };
-        return pipeline;
-    }
+    return tempJob;
+  }
 
-    private initGroups(): Array<any> {
-        let groups: Array<any> = new Array<any>();
-        let originalGroup: any = { name: this.TEMPLATE_JOB_GROUP, jobs: [this.templateJob.name] };
-        let branchesJobGroup: any = { name: this.BRANCHES_JOB_GROUP, jobs: [] };
+  private createGitResourceForBranch(
+    branch: string,
+    gitResourceName: string
+  ): any {
+    let tempGitResource = deepcopy<any>(this.gitResource);
+    tempGitResource.name = gitResourceName;
+    tempGitResource.source = deepcopy<any>(this.gitResource.source);
+    tempGitResource.source.branch = branch;
+    return tempGitResource;
+  }
 
-        groups.push(originalGroup);
-        groups.push(branchesJobGroup);
+  private replace(entry: string, newEntry: string, object: Object): any {
+    let entries = Object.entries(object);
+    let result: Array<any> = new Array<any>();
+    let sEntry: any;
 
-        return groups;
-    }
+    entries.forEach((e: any) => {
+      sEntry = JSON.stringify(e)
+        .split(entry)
+        .join(newEntry);
+      result.push(JSON.parse(sEntry));
+    });
 
-    private createJobForBranch(branch: string): any {
-        let tempJob: any = deepcopy<any>(this.templateJob);
-        let gitResourceName: string = "git_" + branch
-        tempJob.name = "job_" + branch;
-        tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
-
-        let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
-            return p.get == this.gitResource.name;
-        });
-
-        let tmpjp: any;
-
-        if (tempJobPlanIdx != -1) {
-            let tmpjp = tempJob.plan[tempJobPlanIdx];
-            tmpjp.get = gitResourceName;
-            tempJob.plan[tempJobPlanIdx] = tmpjp;
-
-        }
-        tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
-            return p.put == this.gitResource.name;
-        });
-        if (tempJobPlanIdx != -1) {
-            tmpjp = tempJob.plan[tempJobPlanIdx];
-            tmpjp.put = gitResourceName;
-            tempJob.plan[tempJobPlanIdx] = tmpjp;
-        }
-
-        return tempJob
-    }
-
-    private createGitResourceForBranch(branch: string, gitResourceName: string): any {
-
-        let tempGitResource = deepcopy<any>(this.gitResource);
-        tempGitResource.name = gitResourceName;
-        tempGitResource.source = deepcopy<any>(this.gitResource.source)
-        tempGitResource.source.branch = branch;
-        return tempGitResource;
-    }
-
-    private replace(entry: string, newEntry: string, object: Object): any {
-        let entries = Object.entries(object);
-        let result: Array<any> = new Array<any>();
-        let sEntry: any;
-
-        entries.forEach((e: any) => {
-            sEntry = JSON.stringify(e).split(entry).join(newEntry);
-            result.push(JSON.parse(sEntry));
-        });
-
-        return Object.fromEntries(result);
-    }
+    return Object.entries(result);
+  }
 }
-
