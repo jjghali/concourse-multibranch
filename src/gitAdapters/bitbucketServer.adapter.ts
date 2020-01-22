@@ -3,22 +3,18 @@ import * as chalk from "chalk";
 
 import { IGitAdapter } from "./igit.adapter";
 class BitbucketCloudAdapter {
-  private static BITBUCKET_API: string = "https://api.bitbucket.org/2.0";
+  private static BITBUCKET_ENDPOINT: string = "/rest/branch-utils/1.0";
 
   public static getBranches(
+    gitDomain: string,
     project: string,
     repoSlug: string,
     username: any,
     password: any
   ): Promise<any> {
-    let bbCredentials: any = {
-      username: process.env.BITBUCKET_USERNAME,
-      password: process.env.BITBUCKET_PASSWORD
-    };
-
     const endpoint: string =
-      "/repositories/" + project + "/" + repoSlug + "/refs/branches";
-    const urlAPI: string = this.BITBUCKET_API + endpoint;
+      "/projects/" + project + "/repos/" + repoSlug + "/branches";
+    const urlAPI: string = gitDomain + this.BITBUCKET_ENDPOINT + endpoint;
     return axios({
       method: "get",
       url: urlAPI,
