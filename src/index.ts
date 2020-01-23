@@ -38,13 +38,14 @@ program
   .option("-p,--password <password>", "password")
   .option("-g,--git-provider <provider>", "bitbucketServer")
   .option("--git-url <url>", "")
+  .option("-q,--quiet", "No output on console")
   .requiredOption("-P,--project <project>", "project name")
   .requiredOption("-r,--repo-slug <repo-slug>", "Name of the repository")
   .action((opts: any) => {
     new Promise((resolve, reject) => {
       let bbCredentials: any;
 
-      if (opts.username == null && opts.password == null) {
+      if (opts.username == null && opts.password == null && !opts.quiet) {
         console.log(
           chalk.magenta(
             "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead."
@@ -60,6 +61,15 @@ program
           password: opts.password
         };
       }
+
+      if (opts.gitProvider == null && !opts.quiet) {
+        console.log(
+          chalk.magenta(
+            "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
+          )
+        );
+      }
+
       resolve(bbCredentials);
     }).then((bbCredentials: any) => {
       let promise: any;
@@ -74,6 +84,7 @@ program
           );
           break;
         case "bitbucketServer":
+        default:
           promise = BitbucketServerAdapter.getBranches(
             opts.gitUrl,
             opts.project,
@@ -123,6 +134,15 @@ program
         )
       );
     }
+
+    if (opts.gitProvider == null && !opts.quiet) {
+      console.log(
+        chalk.magenta(
+          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
+        )
+      );
+    }
+
     let promise: any;
 
     switch (opts.gitProvider) {
