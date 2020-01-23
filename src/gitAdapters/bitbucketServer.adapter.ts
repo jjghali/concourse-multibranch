@@ -2,8 +2,8 @@ import axios from "axios";
 import * as chalk from "chalk";
 
 import { IGitAdapter } from "./igit.adapter";
-class BitbucketCloudAdapter {
-  private static BITBUCKET_ENDPOINT: string = "/rest/branch-utils/1.0";
+class BitbucketServerAdapter {
+  private static BITBUCKET_ENDPOINT: string = "/rest/api/1.0";
 
   public static getBranches(
     gitDomain: string,
@@ -15,18 +15,30 @@ class BitbucketCloudAdapter {
     const endpoint: string =
       "/projects/" + project + "/repos/" + repoSlug + "/branches";
     const urlAPI: string = gitDomain + this.BITBUCKET_ENDPOINT + endpoint;
+
     return axios({
       method: "get",
       url: urlAPI,
-      auth: { username, password }
-    }).then(res => {
-      let branches: Array<string> = new Array<string>();
-      res.data.values.forEach((val: any) => {
-        branches.push(val.name);
+      auth: { username: username, password: password },
+      headers: { "Content-type": "application/json" }
+    })
+      .then(res => {
+        let branches: Array<string> = new Array<string>();
+        if (gitDomain != null) {
+          res.data.values.forEach((val: any) => {
+            branches.push(val.displayId);
+          });
+
+          return branches;
+        }
+        return [];
+      })
+      .catch((err: any) => {
+        if (gitDomain == null)
+          console.log(chalk.redBright("[Error]: Git Url is missing."));
+        else console.error(err);
       });
-      return branches;
-    });
   }
 }
 
-export { BitbucketCloudAdapter };
+export { BitbucketServerAdapter };

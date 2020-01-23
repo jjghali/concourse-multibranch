@@ -37,6 +37,7 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
+    "@types/request-promise-native": "^1.0.17",
     "ansi-escapes": "^4.3.0",
     "axios": "^0.19.1",
     "boxen": "^4.2.0",
@@ -48,6 +49,8 @@
     "fs": "0.0.1-security",
     "inquirer": "^7.0.3",
     "ora": "^4.0.3",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.8",
     "sha1": "^1.1.1",
     "spawn-promise": "^0.1.8",
     "ts-deepcopy": "^0.1.4",
