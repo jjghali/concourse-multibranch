@@ -35,7 +35,7 @@ class BitbucketServerAdapter {
       })
       .catch((err: any) => {
         if (gitDomain == null)
-          console.log(chalk.redBright("[Error]: Git Url is missing."));
+          console.log(chalk.redBright("[Error] Git Url is missing."));
         else console.error(err);
       });
   }
