@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { JobTransformer } from "../src/jobtranformer";
-import { BitbucketCloudAdapter } from "../src/gitAdapters";
+import { BitbucketServerAdapter } from "../src/gitAdapters";
 
 // describe("JobTransformer", () => {
 //   describe("generatePipeline", () => {
@@ -18,12 +18,19 @@ import { BitbucketCloudAdapter } from "../src/gitAdapters";
 describe("BitbucketCloud", () => {
   describe("branchAvailable", () => {
     it("should return available branches", () => {
-      BitbucketCloudAdapter.getBranches(
-        "joshuaghali-gologic",
-        "concourse-branch-test",
-        "",
-        ""
-      );
+      BitbucketServerAdapter.getBranches(
+        "http://172.16.197.129:7990",
+        "TMQ",
+        "maaah-code",
+        "jjghali",
+        "MDUwOTkyNzY2MzIwOkpf4FhvlTQXIDKL/wc0neeiu/n2"
+      ).then((branches: any) => {
+        branches.forEach((b: string) => {
+          console.log(b);
+        });
+      });
+
+      expect(true);
     });
   });
 });

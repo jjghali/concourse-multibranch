@@ -4,7 +4,7 @@ import "./polyfills";
 
 import * as chalk from "chalk";
 import * as commander from "commander";
-import { BitbucketCloudAdapter } from "./gitAdapters";
+import { BitbucketCloudAdapter, BitbucketServerAdapter } from "./gitAdapters";
 import { JobTransformer } from "./jobtranformer";
 import { resolve } from "dns";
 
@@ -36,7 +36,8 @@ program
   .description("Show all the available branches in bitbucket")
   .option("-u,--username <username>", "username")
   .option("-p,--password <password>", "password")
-  .option("-g,--git-provider <git-provider>", "bitbucketCloud")
+  .option("-g,--git-provider <provider>", "bitbucketServer")
+  .option("--git-url <url>", "")
   .requiredOption("-P,--project <project>", "project name")
   .requiredOption("-r,--repo-slug <repo-slug>", "Name of the repository")
   .action((opts: any) => {
@@ -61,15 +62,37 @@ program
       }
       resolve(bbCredentials);
     }).then((bbCredentials: any) => {
-      BitbucketCloudAdapter.getBranches(
-        opts.project,
-        opts.repoSlug,
-        bbCredentials.username,
-        bbCredentials.password
-      ).then((branches: any) => {
-        branches.forEach((b: string) => {
-          console.log(b);
-        });
+      let promise: any;
+
+      switch (opts.gitProvider) {
+        case "bitbucketCloud":
+          promise = BitbucketCloudAdapter.getBranches(
+            opts.project,
+            opts.repoSlug,
+            bbCredentials.username,
+            bbCredentials.password
+          );
+          break;
+        case "bitbucketServer":
+          promise = BitbucketServerAdapter.getBranches(
+            opts.gitUrl,
+            opts.project,
+            opts.repoSlug,
+            bbCredentials.username,
+            bbCredentials.password
+          );
+          break;
+        case "github":
+          console.log("not yet implemented");
+          break;
+      }
+
+      promise.then((branches: any) => {
+        if (branches) {
+          branches.forEach((b: string) => {
+            console.log(b);
+          });
+        }
       });
     });
   });
@@ -78,6 +101,8 @@ program
   .command("generate-pipelines")
   .alias("gp")
   .description("Generate pipelines")
+  .option("-g,--git-provider <provider>", "bitbucketServer")
+  .option("--git-url <url>", "")
   .option("-u,--username <username>", "username")
   .option("-p,--password <password>", "password")
   .option("-j,--template <template>", "Name of the template job")
@@ -98,15 +123,31 @@ program
         )
       );
     }
+    let promise: any;
 
-    let promise: Promise<any> = BitbucketCloudAdapter.getBranches(
-      opts.project,
-      opts.repoSlug,
-      opts.username,
-      opts.password
-    );
+    switch (opts.gitProvider) {
+      case "bitbucketCloud":
+        promise = BitbucketCloudAdapter.getBranches(
+          opts.project,
+          opts.repoSlug,
+          opts.username,
+          opts.password
+        );
 
-    promise.then(branches => {
+      case "bitbucketServer":
+        promise = BitbucketServerAdapter.getBranches(
+          opts.gitUrl,
+          opts.project,
+          opts.repoSlug,
+          opts.username,
+          opts.password
+        );
+
+      case "github":
+        console.log("not yet implemented");
+    }
+
+    promise.then((branches: any) => {
       let filePath = opts.pipelineFile;
       let templateName = opts.template;
       let jobtranformer: JobTransformer = new JobTransformer(
