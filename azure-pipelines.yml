@@ -20,5 +20,6 @@ steps:
 - task: Npm@1
   inputs:
     command: 'publish'
-    publishEndpoint: 'Artifactory NPM'
+    publishRegistry: 'useFeed'
+    publishFeed: '57187e27-75ab-4b5a-8db0-c87ad649aca8/ad8783ce-98d8-4668-a1ce-a7ccca03d4cb'
   displayName: 'Publish to NPM registry'
