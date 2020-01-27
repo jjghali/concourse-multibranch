@@ -185,7 +185,8 @@ program
       if (opts.outputFilename) {
         fs.writeFile(opts.outputFilename, yamlPipeline, (err: any) => {
           if (err) {
-            return console.log(err);
+            console.log(err);
+            process.exit(1);
           }
           if (!opts.quiet)
             console.log(
@@ -193,6 +194,7 @@ program
             );
         });
       }
+      process.exit(0);
     });
   });
 
