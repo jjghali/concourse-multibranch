@@ -16,16 +16,10 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: 'Artifactory Docker'
-    repository: 'joshuaghaligologic/concourse-multibranch'
-    command: 'buildAndPush'
-    Dockerfile: 'Dockerfile'
-  displayName: 'Build and publish image'
 
 - task: Npm@1
   inputs:
     command: 'publish'
-    publishEndpoint: 'Artifactory NPM'
+    publishRegistry: 'useFeed'
+    publishFeed: '57187e27-75ab-4b5a-8db0-c87ad649aca8/ad8783ce-98d8-4668-a1ce-a7ccca03d4cb'
   displayName: 'Publish to NPM registry'
