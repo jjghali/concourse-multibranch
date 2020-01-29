@@ -1,0 +1,28 @@
+---
+resources:
+- name: github
+  type: git
+  source:
+    uri: https://github.com/jjghali/sga-backend.git    
+    username: jjghali
+    password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
+
+jobs:
+- name: template
+  plan:
+  - get: github
+    trigger: true
+  - task: listFiles 
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: { repository: ubuntu, tag: "bionic" }
+      inputs:
+        - name: github        
+      run:
+        path: /bin/sh
+        args:
+          - -c
+          - |            
+            ls -al github
