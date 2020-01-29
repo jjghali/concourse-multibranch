@@ -1,0 +1,95 @@
+# ======================================================================================================================
+#                                              RESSOURCE TYPE
+# ======================================================================================================================
+resource_types:
+- name: concourse-pipeline
+  type: docker-image
+  source:
+    repository: concourse/concourse-pipeline-resource
+    
+resources:
+- name: git-demo
+  type: git
+  check_every: 30m
+  source:
+    uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/TMQ/maaah-code.git
+    private_key: ((git-key))
+# Ressource GIT pour checkout le depot de resource infra
+- name: git-concourse
+  type: git
+  source:
+    private_key: ((git-key))
+    uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/concourse.git
+    branch: feature/infra-multibranch
+# Set Pipelines
+- name: my-pipelines
+  type: concourse-pipeline
+  icon: pipe
+  source:
+    target: https://ci.cfzcea.dev.desjardins.com
+    insecure: "false"
+    teams:
+    - name: desjardins-digital-poc
+      password: ((concourse-basic-auth-password))
+      username: desjardins-digital-poc
+      
+jobs:
+- name: template
+  serial: true
+  public: false
+  plan:
+  - in_parallel:
+    - get: git-demo
+    - get: git-concourse
+  - task: maven-build
+    file: git-concourse/04_tasks/maven-build/maven-build.yml
+    input_mapping:
+      git: git-demo
+- name: concourse-multi-branch
+  serial: true
+  public: false
+  plan:
+  - get: git-concourse
+  - get: my-pipelines
+  - task: scan-pipeline
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: emeraldsquad/cf-cli
+      inputs:
+      - name: my-pipelines
+      outputs:
+      - name: pipelines
+      run:
+        path: bash
+        args:
+        - -cxe
+        - |
+          set +x
+          pwd
+          ls -ltra
+          find .
+          mv ./my-pipelines/desjardins-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
+  - task: infra-multibranch
+    file: git-concourse/04_tasks/infra-multibranch/infra-multibranch.yml
+    input_mapping:
+      pipelines: pipelines
+    output_mapping:
+      result: pipeline_generated
+    params: 
+      COMPONENT_NAME: demo-application-java
+      PRODUCT_NAME: desjardins-digital
+  - put: my-pipelines
+    params:
+      pipelines:
+      - name: my-pipeline
+        team: desjardins-digital-poc
+        config_file: pipeline_generated/pipeline-generated.yml
+
+groups:
+- name: devops
+  jobs:
+  - concourse-multi-branch
+  - template
