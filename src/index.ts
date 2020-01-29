@@ -127,74 +127,94 @@ program
     "Output filename for the created yaml file"
   )
   .action((opts: any) => {
-    if (opts.username == "" && opts.password == "" && !opts.quiet) {
-      console.log(
-        chalk.magenta(
-          "[Info] No credentials specified in the arguments. We will use the credentials in BITBUCKET_USERNAME AND BITBUCKET_PASSWORD"
-        )
-      );
-    }
+    new Promise((resolve, reject) => {
+      let bbCredentials: any;
 
-    if (opts.gitProvider == null && !opts.quiet) {
-      console.log(
-        chalk.magenta(
-          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
-        )
-      );
-    }
-
-    let promise: any;
-
-    switch (opts.gitProvider) {
-      case "bitbucketCloud":
-        promise = BitbucketCloudAdapter.getBranches(
-          opts.project,
-          opts.repoSlug,
-          opts.username,
-          opts.password
+      if (opts.username == null && opts.password == null && !opts.quiet) {
+        console.log(
+          chalk.magenta(
+            "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead."
+          )
         );
-
-      case "bitbucketServer":
-        promise = BitbucketServerAdapter.getBranches(
-          opts.gitUrl,
-          opts.project,
-          opts.repoSlug,
-          opts.username,
-          opts.password
-        );
-
-      case "github":
-        console.log("not yet implemented");
-    }
-
-    promise.then((branches: any) => {
-      let filePath = opts.pipelineFile;
-      let templateName = opts.template;
-      let jobtranformer: JobTransformer = new JobTransformer(
-        filePath,
-        templateName
-      );
-
-      let finalPipeline = jobtranformer.generatePipeline(branches);
-      let yamlPipeline = "---\n" + YAML.stringify(finalPipeline);
-
-      if (opts.outputToConsole && !opts.quiet) {
-        console.log(yamlPipeline);
+        bbCredentials = {
+          username: process.env.BITBUCKET_USERNAME,
+          password: process.env.BITBUCKET_PASSWORD
+        };
+      } else {
+        bbCredentials = {
+          username: opts.username,
+          password: opts.password
+        };
       }
 
-      if (opts.outputFilename) {
-        fs.writeFile(opts.outputFilename, yamlPipeline, (err: any) => {
-          if (err) {
-            console.log(err);
-            process.exit(1);
-          }
-          if (!opts.quiet)
-            console.log(
-              "New pipeline can be found in " + chalk.blue(opts.outputFilename)
-            );
-        });
+      if (opts.gitProvider == null && !opts.quiet) {
+        console.log(
+          chalk.magenta(
+            "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
+          )
+        );
       }
-      process.exit(0);
+
+      resolve(bbCredentials);
+    }).then((bbCredentials: any) => {
+      let promise: any;
+
+      switch (opts.gitProvider) {
+        case "bitbucketCloud":
+          promise = BitbucketCloudAdapter.getBranches(
+            opts.project,
+            opts.repoSlug,
+            bbCredentials.username,
+            bbCredentials.password
+          );
+          break;
+        case "bitbucketServer":
+        default:
+          promise = BitbucketServerAdapter.getBranches(
+            opts.gitUrl,
+            opts.project,
+            opts.repoSlug,
+            bbCredentials.username,
+            bbCredentials.password
+          );
+          break;
+        case "github":
+          console.log("not yet implemented");
+          break;
+      }
+
+      promise.then((branches: any) => {
+        let filePath = opts.pipelineFile;
+        let templateName = opts.template;
+        let jobtranformer: JobTransformer = new JobTransformer(
+          filePath,
+          templateName,
+          opts.project,
+          opts.repoSlug
+        );
+
+        let finalPipeline = jobtranformer.generatePipeline(branches);
+        let yamlPipeline = "---\n" + YAML.stringify(finalPipeline);
+
+        if (opts.outputToConsole && !opts.quiet) {
+          console.log(yamlPipeline);
+        }
+
+        if (opts.outputFilename) {
+          fs.writeFile(opts.outputFilename, yamlPipeline, (err: any) => {
+            if (err) {
+              console.log(err);
+              process.exit(1);
+            }
+            if (!opts.quiet)
+              console.log(
+                "New pipeline can be found in " +
+                  chalk.blue(opts.outputFilename)
+              );
+          });
+        }
+        process.exit(0);
+      });
     });
   });
 
