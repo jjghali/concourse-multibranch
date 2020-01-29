@@ -1,5 +1,6 @@
 import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
+import { Job } from "./Job";
 
 const fs = require("fs");
 const sha1 = require("sha1");
@@ -11,18 +12,23 @@ export class JobTransformer {
   private BRANCHES_JOB_GROUP: string = "branchesJobs";
 
   private parsedPipeline: any;
-  private templateJob: any;
+  private templateJob: Job = new Job();
   private pipelineHash: string = "";
   private pipelineName: string = "";
   private gitResource: any;
 
-  constructor(pipelineFilePath: string, templateJobName: string) {
+  constructor(
+    pipelineFilePath: string,
+    templateJobName: string,
+    project: string,
+    reposSlug: string
+  ) {
     const file = fs.readFileSync(pipelineFilePath, "utf8");
 
     this.parsedPipeline = YAML.parse(file);
     this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
     this.getTemplateJob(templateJobName);
-    this.getGitResource();
+    this.getGitResource(project, reposSlug);
   }
 
   private getTemplateJob(templateJobName: string): void {
@@ -32,9 +38,13 @@ export class JobTransformer {
     });
   }
 
-  private getGitResource(): void {
+  private getGitResource(project: string, reposSlug: string): void {
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
-      return r.type == "git" && r.source.branch == "master";
+      return (
+        r.type == "git" &&
+        r.source.uri.includes(project) &&
+        r.source.uri.includes(reposSlug)
+      );
     });
   }
 
@@ -97,7 +107,8 @@ export class JobTransformer {
   }
 
   private createJobForBranch(branch: string): any {
-    let tempJob: any = deepcopy<any>(this.templateJob);
+    let tempJob: any = deepcopy<Job>(this.templateJob);
+
     let gitResourceName: string = "git_" + branch;
     tempJob.name = "job_" + branch;
     tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
@@ -136,18 +147,20 @@ export class JobTransformer {
     return tempGitResource;
   }
 
-  private replace(entry: string, newEntry: string, object: Object): any {
+  private replace(entry: string, newEntry: string, object: Job): Object {
     let entries = Object.entries(object);
     let result: Array<any> = new Array<any>();
-    let sEntry: any;
+    let sEntry: any = JSON.stringify(object)
+      .split(entry)
+      .join(newEntry);
 
-    entries.forEach((e: any) => {
-      sEntry = JSON.stringify(e)
-        .split(entry)
-        .join(newEntry);
-      result.push(JSON.parse(sEntry));
-    });
+    // entries.forEach((e: any) => {
+    //   sEntry = JSON.stringify(e)
+    //     .split(entry)
+    //     .join(newEntry);
+    //   result.push(JSON.parse(sEntry));
+    // });
 
-    return Object.entries(result);
+    return JSON.parse(sEntry);
   }
 }
