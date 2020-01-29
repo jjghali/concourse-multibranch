@@ -39,8 +39,6 @@ export class JobTransformer {
   }
 
   private getGitResource(project: string, reposSlug: string): void {
-    const gitResourceExist =;
-
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
         r.type == "git" &&
