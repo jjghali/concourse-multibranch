@@ -39,15 +39,15 @@ export class JobTransformer {
   }
 
   private getGitResource(project: string, reposSlug: string): void {
-    const gitResourceExist = (r: any) => {
+    const gitResourceExist =;
+
+    this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
         r.type == "git" &&
         r.source.uri.includes(project) &&
         r.source.uri.includes(reposSlug)
       );
-    };
-
-    this.gitResource = this.parsedPipeline.resources.find(gitResourceExist);
+    });
   }
 
   generatePipeline(branches: string[]): any {
