@@ -3,9 +3,9 @@ resources:
 - name: github
   type: git
   source:
-    uri: https://github.com/jjghali/sga-backend.git    
+    uri: http://172.16.197.129:7990/scm/tmq/maaah-code.git
     username: jjghali
-***REMOVED***
+    password: 6tfc7ygv
 
 jobs:
 - name: template

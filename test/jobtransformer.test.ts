@@ -1,21 +1,19 @@
 import { expect } from "chai";
 import { JobTransformer } from "../src/jobtranformer";
 import { BitbucketServerAdapter } from "../src/gitAdapters";
-import YAML from "yaml";
+const YAML = require("yaml");
 
 describe("JobTransformer", () => {
   describe("generatePipeline", () => {
     it("should return the new pipeline", () => {
       let jbt: JobTransformer = new JobTransformer(
-        "../example/template.pipeline.yml",
+        "template.pipeline.yml",
         "template",
         "TMQ",
         "maah-code"
       );
 
-      console.log(
-        YAML.stringify(jbt.generatePipeline(["branche1", "branche2"]))
-      );
+      console.log(YAML.stringify(jbt.generatePipeline(["branch1", "branch2"])));
     });
   });
 });
