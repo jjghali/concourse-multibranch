@@ -39,13 +39,15 @@ export class JobTransformer {
   }
 
   private getGitResource(project: string, reposSlug: string): void {
-    this.gitResource = this.parsedPipeline.resources.find((r: any) => {
+    const gitResourceExist = (r: any) => {
       return (
         r.type == "git" &&
         r.source.uri.includes(project) &&
         r.source.uri.includes(reposSlug)
       );
-    });
+    };
+
+    this.gitResource = this.parsedPipeline.resources.find(gitResourceExist);
   }
 
   generatePipeline(branches: string[]): any {
@@ -107,33 +109,35 @@ export class JobTransformer {
   }
 
   private createJobForBranch(branch: string): any {
-    let tempJob: any = deepcopy<Job>(this.templateJob);
+    if (this.gitResource != null) {
+      let tempJob: any = deepcopy<Job>(this.templateJob);
 
-    let gitResourceName: string = "git_" + branch;
-    tempJob.name = "job_" + branch;
-    tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
+      let gitResourceName: string = "git_" + branch;
+      tempJob.name = "job_" + branch;
+      tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
 
-    let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
-      return p.get == this.gitResource.name;
-    });
+      let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
+        return p.get == this.gitResource.name;
+      });
 
-    let tmpjp: any;
+      let tmpjp: any;
 
-    if (tempJobPlanIdx != -1) {
-      let tmpjp = tempJob.plan[tempJobPlanIdx];
-      tmpjp.get = gitResourceName;
-      tempJob.plan[tempJobPlanIdx] = tmpjp;
-    }
-    tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
-      return p.put == this.gitResource.name;
-    });
-    if (tempJobPlanIdx != -1) {
-      tmpjp = tempJob.plan[tempJobPlanIdx];
-      tmpjp.put = gitResourceName;
-      tempJob.plan[tempJobPlanIdx] = tmpjp;
-    }
+      if (tempJobPlanIdx != -1) {
+        let tmpjp = tempJob.plan[tempJobPlanIdx];
+        tmpjp.get = gitResourceName;
+        tempJob.plan[tempJobPlanIdx] = tmpjp;
+      }
+      tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
+        return p.put == this.gitResource.name;
+      });
+      if (tempJobPlanIdx != -1) {
+        tmpjp = tempJob.plan[tempJobPlanIdx];
+        tmpjp.put = gitResourceName;
+        tempJob.plan[tempJobPlanIdx] = tmpjp;
+      }
 
-    return tempJob;
+      return tempJob;
+    } else return null;
   }
 
   private createGitResourceForBranch(

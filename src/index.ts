@@ -2,12 +2,12 @@
 
 import "./polyfills";
 
-import * as chalk from "chalk";
 import * as commander from "commander";
 import { BitbucketCloudAdapter, BitbucketServerAdapter } from "./gitAdapters";
 import { JobTransformer } from "./jobtranformer";
 import { resolve } from "dns";
 
+const chalk = require("chalk");
 const dotenv = require("dotenv");
 const YAML = require("yaml");
 const fs = require("fs");
@@ -20,9 +20,7 @@ program
   .storeOptionsAsProperties(false) // <--- change behaviour
   .passCommandToAction(false); // <--- change behaviour
 
-program
-  .version("1.0.0")
-  .description(chalk.yellow("Concourse Multibranch generator"));
+program.version("1.0.0").description("Concourse Multibranch generator");
 
 program
   .command("config")
