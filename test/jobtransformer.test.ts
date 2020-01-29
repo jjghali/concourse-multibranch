@@ -7,10 +7,10 @@ describe("JobTransformer", () => {
   describe("generatePipeline", () => {
     it("should return the new pipeline", () => {
       let jbt: JobTransformer = new JobTransformer(
-        "pipeline-exemple.yml",
+        "../example/template.pipeline.yml",
         "template",
-        "***REMOVED***",
-        "demo-application-java"
+        "TMQ",
+        "maah-code"
       );
 
       console.log(
