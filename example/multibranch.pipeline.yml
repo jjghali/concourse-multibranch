@@ -62,7 +62,7 @@ jobs:
             npm run build
             cd ..
             # node cmbranch-git/dist/index.js ba --git-url http://172.16.197.129:7990 -P tmq -r maaah-code -u jjghali -p 6tfc7ygv 
-            node cmbranch-git/dist/index.js gp --git-url http://172.16.197.129:7990 -j template -i my-pipelines/main-TemplatePipeline.yml -P tmq -r maaah-code -u jjghali -p 6tfc7ygv -O -q > output.pipeline.yml 
+            node cmbranch-git/dist/index.js gp --git-url http://172.16.197.129:7990 -j template -i my-pipelines/main-TemplatePipeline.yml -P tmq -r maaah-code -u jjghali -p 6tfc7ygv -f output.pipeline.yml 
             mv output.pipeline.yml generated-pipelines
       
   - put: my-pipelines
