@@ -5,12 +5,11 @@ import "./polyfills";
 import * as commander from "commander";
 import { BitbucketCloudAdapter, BitbucketServerAdapter } from "./gitAdapters";
 import { JobTransformer } from "./jobtranformer";
-import { resolve } from "dns";
 
 const chalk = require("chalk");
 const dotenv = require("dotenv");
 const YAML = require("yaml");
-const fs = require("fs");
+const fs = require("fs-extra");
 
 const program = new commander.Command();
 
@@ -181,38 +180,44 @@ program
           break;
       }
 
-      promise.then((branches: any) => {
-        let filePath = opts.pipelineFile;
-        let templateName = opts.template;
-        let jobtranformer: JobTransformer = new JobTransformer(
-          filePath,
-          templateName,
-          opts.project,
-          opts.repoSlug
-        );
+      promise
+        .then((branches: any) => {
+          let filePath = opts.pipelineFile;
+          let templateName = opts.template;
+          let jobtranformer: JobTransformer = new JobTransformer(
+            filePath,
+            templateName,
+            opts.project,
+            opts.repoSlug
+          );
 
-        let finalPipeline = jobtranformer.generatePipeline(branches);
-        let yamlPipeline = "---\n" + YAML.stringify(finalPipeline);
+          let finalPipeline = jobtranformer.generatePipeline(branches);
+          let yamlPipeline = "---\n" + YAML.stringify(finalPipeline);
+          return yamlPipeline;
+        })
+        .then((yamlPipeline: string) => {
+          if (opts.outputToConsole) {
+            console.log(yamlPipeline);
+          }
 
-        if (opts.outputToConsole) {
-          console.log(yamlPipeline);
-        }
-
-        if (opts.outputFilename) {
-          fs.writeFile(opts.outputFilename, yamlPipeline, (err: any) => {
-            if (err) {
-              console.log(err);
-              process.exit(1);
-            }
-            if (!opts.quiet)
-              console.log(
-                "New pipeline can be found in " +
-                  chalk.blue(opts.outputFilename)
-              );
-          });
-        }
-        process.exit(0);
-      });
+          if (opts.outputFilename) {
+            fs.writeFile(opts.outputFilename, yamlPipeline)
+              .then(() => {
+                if (!opts.quiet)
+                  console.log(
+                    "New pipeline can be found in " +
+                      chalk.blue(opts.outputFilename)
+                  );
+                process.exit(0);
+              })
+              .catch((err: any) => {
+                if (err) {
+                  console.log(err);
+                  process.exit(1);
+                }
+              });
+          }
+        });
     });
   });
 
