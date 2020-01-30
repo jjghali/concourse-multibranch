@@ -110,6 +110,7 @@ program
   .alias("gp")
   .description("Generate pipelines")
   .option("-g,--git-provider <provider>", "bitbucketServer")
+  .option("--git-resource-name <resource-name>", "")
   .option("--git-url <url>", "")
   .option("-u,--username <username>", "username")
   .option("-p,--password <password>", "password")
@@ -188,7 +189,8 @@ program
             filePath,
             templateName,
             opts.project,
-            opts.repoSlug
+            opts.repoSlug,
+            opts.gitResourceName
           );
 
           let finalPipeline = jobtranformer.generatePipeline(branches);
