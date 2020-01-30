@@ -1,6 +1,6 @@
 {
   "name": "ccbranch-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Concourse resource allowing mutliple branch to run on a specific pipeline",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
