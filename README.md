@@ -72,7 +72,11 @@ BITBUCKET_PASSWORD=password or deploy key
 
 After that you will be able to run the app without putting the credentials in the arguments.
 
-### Using the Docker image with Docker compose
+### Examples
+
+You will find examples of how to use it with Concourse CI in the _example_ folder.
+
+### Using the Docker image with Docker compose (WIP)
 
 ```yaml
 version: "3.3"
