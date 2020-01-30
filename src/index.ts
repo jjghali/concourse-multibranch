@@ -194,7 +194,7 @@ program
         let finalPipeline = jobtranformer.generatePipeline(branches);
         let yamlPipeline = "---\n" + YAML.stringify(finalPipeline);
 
-        if (opts.outputToConsole && !opts.quiet) {
+        if (opts.outputToConsole) {
           console.log(yamlPipeline);
         }
 
