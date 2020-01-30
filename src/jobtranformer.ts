@@ -21,14 +21,15 @@ export class JobTransformer {
     pipelineFilePath: string,
     templateJobName: string,
     project: string,
-    reposSlug: string
+    reposSlug: string,
+    gitResourceName: string
   ) {
     const file = fs.readFileSync(pipelineFilePath, "utf8");
 
     this.parsedPipeline = YAML.parse(file);
     this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
     this.getTemplateJob(templateJobName);
-    this.getGitResource(project, reposSlug);
+    this.getGitResource(project, reposSlug, gitResourceName);
   }
 
   private getTemplateJob(templateJobName: string): void {
@@ -38,9 +39,14 @@ export class JobTransformer {
     });
   }
 
-  private getGitResource(project: string, reposSlug: string): void {
+  private getGitResource(
+    project: string,
+    reposSlug: string,
+    gitResourceName: string
+  ): void {
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
+        r.name == gitResourceName &&
         r.type == "git" &&
         r.source.uri.includes(project) &&
         r.source.uri.includes(reposSlug)
