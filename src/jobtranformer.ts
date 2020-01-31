@@ -3,7 +3,6 @@ import deepcopy from "ts-deepcopy";
 import { Job } from "./Job";
 
 const fs = require("fs");
-const sha1 = require("sha1");
 const YAML = require("yaml");
 const path = require("path");
 
@@ -151,18 +150,9 @@ export class JobTransformer {
   }
 
   private replace(entry: string, newEntry: string, object: Job): Object {
-    let entries = Object.entries(object);
-    let result: Array<any> = new Array<any>();
     let sEntry: any = JSON.stringify(object)
       .split(entry)
       .join(newEntry);
-
-    // entries.forEach((e: any) => {
-    //   sEntry = JSON.stringify(e)
-    //     .split(entry)
-    //     .join(newEntry);
-    //   result.push(JSON.parse(sEntry));
-    // });
 
     return JSON.parse(sEntry);
   }
