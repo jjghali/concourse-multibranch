@@ -1,7 +1,5 @@
 import axios from "axios";
-import * as chalk from "chalk";
 
-import { IGitAdapter } from "./igit.adapter";
 class BitbucketCloudAdapter {
   private static BITBUCKET_API: string = "https://api.bitbucket.org/2.0";
 
@@ -11,11 +9,6 @@ class BitbucketCloudAdapter {
     username: any,
     password: any
   ): Promise<any> {
-    let bbCredentials: any = {
-      username: process.env.BITBUCKET_USERNAME,
-      password: process.env.BITBUCKET_PASSWORD
-    };
-
     const endpoint: string =
       "/repositories/" + project + "/" + repoSlug + "/refs/branches";
     const urlAPI: string = this.BITBUCKET_API + endpoint;
