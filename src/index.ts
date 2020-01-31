@@ -19,7 +19,7 @@ program
   .storeOptionsAsProperties(false) // <--- change behaviour
   .passCommandToAction(false); // <--- change behaviour
 
-program.version("1.0.0").description("Concourse Multibranch generator");
+program.version("1.0.8").description("Concourse Multibranch generator");
 
 program
   .command("config")
