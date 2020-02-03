@@ -30,6 +30,7 @@ export class JobTransformer {
     this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
     this.getTemplateJob(templateJobName);
     this.getGitResource(project, reposSlug);
+    this.removeConcoursePipelineResource();
   }
 
   private getTemplateJob(templateJobName: string): void {
@@ -41,7 +42,6 @@ export class JobTransformer {
 
   private getGitResource(project: string, reposSlug: string): void {
     this.originalGitResources = deepcopy<any>(this.parsedPipeline.resources);
-    // this.originalGitResources = this.parsedPipeline.resources;
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
         r.name.indexOf("git_") == -1 &&
@@ -52,16 +52,22 @@ export class JobTransformer {
     });
   }
 
+  private removeConcoursePipelineResource() {
+    let index: number = this.originalGitResources.findIndex((r: any) => {
+      r.type == "concourse-pipeline";
+    });
+    if (index > -1) {
+      this.originalGitResources.splice(index, 1);
+    }
+  }
+
   generatePipeline(branches: string[]): any {
     let newPipeline: BranchPipeline = new BranchPipeline();
 
-    // let resources: Array<any> = this.originalGitResources;
     let jobs: Array<any> = new Array<any>();
     let groups: Array<any> = this.initGroups();
 
     jobs.push(this.templateJob);
-
-    this.originalGitResources.push(this.gitResource);
 
     branches.forEach(b => {
       let gitResourceNane: string = "git_" + b;
