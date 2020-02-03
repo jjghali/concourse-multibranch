@@ -1,7 +1,6 @@
 import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
 import { Job } from "./Job";
-import { Resource } from "./resource";
 
 const fs = require("fs");
 const YAML = require("yaml");
