@@ -1,6 +1,7 @@
 import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
 import { Job } from "./Job";
+import { Resource } from "./resource";
 
 const fs = require("fs");
 const YAML = require("yaml");
@@ -15,6 +16,7 @@ export class JobTransformer {
   private pipelineHash: string = "";
   private pipelineName: string = "";
   private gitResource: any;
+  private originalGitResources: Array<any> = Array<any>();
 
   constructor(
     pipelineFilePath: string,
@@ -38,6 +40,8 @@ export class JobTransformer {
   }
 
   private getGitResource(project: string, reposSlug: string): void {
+    this.originalGitResources = deepcopy<any>(this.parsedPipeline.resources);
+    // this.originalGitResources = this.parsedPipeline.resources;
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
         r.name.indexOf("git_") == -1 &&
@@ -51,12 +55,13 @@ export class JobTransformer {
   generatePipeline(branches: string[]): any {
     let newPipeline: BranchPipeline = new BranchPipeline();
 
-    let resources: Array<any> = new Array<any>();
+    // let resources: Array<any> = this.originalGitResources;
     let jobs: Array<any> = new Array<any>();
     let groups: Array<any> = this.initGroups();
 
     jobs.push(this.templateJob);
-    resources.push(this.gitResource);
+
+    this.originalGitResources.push(this.gitResource);
 
     branches.forEach(b => {
       let gitResourceNane: string = "git_" + b;
@@ -66,7 +71,7 @@ export class JobTransformer {
       let tempGitResource = this.createGitResourceForBranch(b, gitResourceNane);
 
       jobs.push(tempJob);
-      resources.push(tempGitResource);
+      this.originalGitResources.push(tempGitResource);
 
       groups
         .find(g => {
@@ -75,7 +80,11 @@ export class JobTransformer {
         .jobs.push(jobName);
     });
 
-    let finalPipeline: any = this.finalizePipeline(resources, jobs, groups);
+    let finalPipeline: any = this.finalizePipeline(
+      this.originalGitResources,
+      jobs,
+      groups
+    );
 
     newPipeline.name = this.pipelineName + "_" + this.pipelineHash;
     newPipeline.hash = this.pipelineHash;
@@ -153,7 +162,6 @@ export class JobTransformer {
     let sEntry: any = JSON.stringify(object)
       .split(entry)
       .join(newEntry);
-
     return JSON.parse(sEntry);
   }
 }
