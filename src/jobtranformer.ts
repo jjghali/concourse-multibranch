@@ -7,7 +7,6 @@ const YAML = require("yaml");
 const path = require("path");
 
 export class JobTransformer {
-  private TEMPLATE_JOB_GROUP: string = "templateJob";
   private BRANCHES_JOB_GROUP: string = "branchesJobs";
 
   private parsedPipeline: any;
@@ -16,6 +15,7 @@ export class JobTransformer {
   private pipelineName: string = "";
   private gitResource: any;
   private originalGitResources: Array<any> = Array<any>();
+  private originalJobs: Array<any> = new Array<any>();
 
   constructor(
     pipelineFilePath: string,
@@ -29,6 +29,8 @@ export class JobTransformer {
     this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
     this.getTemplateJob(templateJobName);
     this.getGitResource(project, reposSlug);
+    this.getOriginalJobs();
+    this.removeOldResources();
     this.removeConcoursePipelineResource();
   }
 
@@ -51,6 +53,22 @@ export class JobTransformer {
     });
   }
 
+  private getOriginalJobs(): void {
+    this.originalJobs = deepcopy<any>(
+      this.parsedPipeline.jobs.filter((j: any) => {
+        !j.name.includes("job_");
+      })
+    );
+  }
+
+  private removeOldResources(): void {
+    this.parsedPipeline.resources = this.parsedPipeline.resources.filter(
+      (j: any) => {
+        !j.name.includes("git_");
+      }
+    );
+  }
+
   private removeConcoursePipelineResource() {
     let index: number = this.originalGitResources.findIndex((r: any) => {
       r.type == "concourse-pipeline";
@@ -63,10 +81,8 @@ export class JobTransformer {
   generatePipeline(branches: string[]): any {
     let newPipeline: BranchPipeline = new BranchPipeline();
 
-    let jobs: Array<any> = new Array<any>();
+    let jobs: Array<any> = this.parsedPipeline.jobs;
     let groups: Array<any> = this.initGroups();
-
-    jobs.push(this.templateJob);
 
     branches.forEach(b => {
       let gitResourceNane: string = "git_" + b;
@@ -77,6 +93,10 @@ export class JobTransformer {
 
       jobs.push(tempJob);
       this.originalGitResources.push(tempGitResource);
+
+      this.originalJobs.forEach((j: any) => {
+        jobs.push(j);
+      });
 
       groups
         .find(g => {
@@ -107,14 +127,10 @@ export class JobTransformer {
   }
 
   private initGroups(): Array<any> {
-    let groups: Array<any> = new Array<any>();
-    let originalGroup: any = {
-      name: this.TEMPLATE_JOB_GROUP,
-      jobs: [this.templateJob.name]
-    };
+    let groups: Array<any> = this.parsedPipeline.groups;
+
     let branchesJobGroup: any = { name: this.BRANCHES_JOB_GROUP, jobs: [] };
 
-    groups.push(originalGroup);
     groups.push(branchesJobGroup);
 
     return groups;
