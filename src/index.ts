@@ -10,9 +10,10 @@ const chalk = require("chalk");
 const dotenv = require("dotenv");
 const YAML = require("yaml");
 const fs = require("fs-extra");
+const printTool = require("print-tools-js");
 
 const program = new commander.Command();
-
+const printToolConfig = { log: true, emoji: true };
 dotenv.config();
 
 program
@@ -25,7 +26,7 @@ program
   .command("config")
   .alias("cfg")
   .description("Configures the app (NYI)")
-  .action(() => {});
+  .action(() => { });
 
 program
   .command("branch-available")
@@ -43,11 +44,8 @@ program
       let bbCredentials: any;
 
       if (opts.username == null && opts.password == null && !opts.quiet) {
-        console.log(
-          chalk.magenta(
-            "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead."
-          )
-        );
+        printTool.warning("[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
+
         bbCredentials = {
           username: process.env.BITBUCKET_USERNAME,
           password: process.env.BITBUCKET_PASSWORD
@@ -60,11 +58,8 @@ program
       }
 
       if (opts.gitProvider == null && !opts.quiet) {
-        console.log(
-          chalk.magenta(
-            "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
-          )
-        );
+        printTool.warning(
+          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default.", printToolConfig);
       }
 
       resolve(bbCredentials);
@@ -111,6 +106,7 @@ program
   .description("Generate pipelines")
   .option("-g,--git-provider <provider>", "bitbucketServer")
   .option("--git-url <url>", "")
+  .requiredOption("--git-resource", "resource name")
   .option("-u,--username <username>", "username")
   .option("-p,--password <password>", "password")
   .option("-j,--template <template>", "Name of the template job")
@@ -127,12 +123,12 @@ program
     new Promise((resolve, reject) => {
       let bbCredentials: any;
 
+      printTool.chevron("Getting branches from Git repository");
+
       if (opts.username == null && opts.password == null && !opts.quiet) {
-        console.log(
-          chalk.magenta(
-            "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead."
-          )
-        );
+
+        printTool.warning(
+          "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
         bbCredentials = {
           username: process.env.BITBUCKET_USERNAME,
           password: process.env.BITBUCKET_PASSWORD
@@ -145,13 +141,11 @@ program
       }
 
       if (opts.gitProvider == null && !opts.quiet) {
-        console.log(
-          chalk.magenta(
-            "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default."
-          )
+        printTool.warning(
+          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default.",
+          printToolConfig
         );
       }
-
       resolve(bbCredentials);
     }).then((bbCredentials: any) => {
       let promise: any;
@@ -182,13 +176,23 @@ program
 
       promise
         .then((branches: any) => {
+          printTool.success("Branches retrieved successfully from repository.", printToolConfig);
+          printTool.info("We will be using the followin branches:", printToolConfig);
+
+          branches.forEach((b: string) => {
+            printTool.bullet(b)
+          });
+
+          printTool.chevron("Generating pipelines...", printToolConfig)
+
           let filePath = opts.pipelineFile;
           let templateName = opts.template;
           let jobtranformer: JobTransformer = new JobTransformer(
             filePath,
             templateName,
             opts.project,
-            opts.repoSlug
+            opts.repoSlug,
+            opts.gitResource
           );
 
           let finalPipeline = jobtranformer.generatePipeline(branches);
@@ -196,6 +200,7 @@ program
           return yamlPipeline;
         })
         .then((yamlPipeline: string) => {
+          printTool.success("Pipeline generated successfully.", printToolConfig)
           if (opts.outputToConsole) {
             console.log(yamlPipeline);
           }
@@ -204,15 +209,16 @@ program
             fs.writeFile(opts.outputFilename, yamlPipeline)
               .then(() => {
                 if (!opts.quiet)
-                  console.log(
+                  printTool.info(
                     "New pipeline can be found in " +
-                      chalk.blue(opts.outputFilename)
-                  );
+                    opts.outputFilename
+                    , printToolConfig);
                 process.exit(0);
               })
               .catch((err: any) => {
                 if (err) {
-                  console.log(err);
+                  // console.log(err);
+                  printTool.error("Something wrong happened", printToolConfig)
                   process.exit(1);
                 }
               });

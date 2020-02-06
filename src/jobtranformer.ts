@@ -1,7 +1,7 @@
 import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
 import { Job } from "./Job";
-const printTool = require("print-tool-js");
+
 const fs = require("fs");
 const YAML = require("yaml");
 const path = require("path");
@@ -44,19 +44,12 @@ export class JobTransformer {
     });
   }
 
-  private getGitResource(
-    project: string,
-    reposSlug: string,
-    gitResourceName: string
-  ): void {
+  private getGitResource(project: string, reposSlug: string, gitResourceName: string): void {
     this.originalGitResources = deepcopy<any>(this.parsedPipeline.resources);
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
-        r.name == gitResourceName &&
         r.type == "git" &&
-        r.source.uri.includes(project) &&
-        r.source.uri.includes(reposSlug) &&
-        r.source.branch == "master"
+        r.name == gitResourceName
       );
     });
   }
@@ -142,10 +135,7 @@ export class JobTransformer {
   private initGroups(): Array<any> {
     let groups: Array<any> = this.parsedPipeline.groups;
 
-    let branchesJobGroup: any = {
-      name: this.BRANCHES_JOB_GROUP,
-      jobs: []
-    };
+    let branchesJobGroup: any = { name: this.BRANCHES_JOB_GROUP, jobs: [] };
 
     groups.push(branchesJobGroup);
 
