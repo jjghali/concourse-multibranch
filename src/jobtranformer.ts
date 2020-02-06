@@ -1,7 +1,7 @@
 import BranchPipeline from "./branchPipeline";
 import deepcopy from "ts-deepcopy";
 import { Job } from "./Job";
-
+const printTool = require("print-tool-js");
 const fs = require("fs");
 const YAML = require("yaml");
 const path = require("path");
@@ -16,19 +16,22 @@ export class JobTransformer {
   private gitResource: any;
   private originalGitResources: Array<any> = Array<any>();
   private originalJobs: Array<any> = new Array<any>();
+  private resourceTypes: any;
 
   constructor(
     pipelineFilePath: string,
     templateJobName: string,
     project: string,
-    reposSlug: string
+    reposSlug: string,
+    gitResourceName: string
   ) {
     const file = fs.readFileSync(pipelineFilePath, "utf8");
 
     this.parsedPipeline = YAML.parse(file);
     this.pipelineName = path.basename(pipelineFilePath).replace(".yml", "");
     this.getTemplateJob(templateJobName);
-    this.getGitResource(project, reposSlug);
+    this.getGitResource(project, reposSlug, gitResourceName);
+    this.getResourceTypes();
     this.getOriginalJobs();
     this.removeOldResources();
     this.removeConcoursePipelineResource();
@@ -41,16 +44,25 @@ export class JobTransformer {
     });
   }
 
-  private getGitResource(project: string, reposSlug: string): void {
+  private getGitResource(
+    project: string,
+    reposSlug: string,
+    gitResourceName: string
+  ): void {
     this.originalGitResources = deepcopy<any>(this.parsedPipeline.resources);
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
       return (
-        r.name.indexOf("git_") == -1 &&
+        r.name == gitResourceName &&
         r.type == "git" &&
         r.source.uri.includes(project) &&
-        r.source.uri.includes(reposSlug)
+        r.source.uri.includes(reposSlug) &&
+        r.source.branch == "master"
       );
     });
+  }
+
+  private getResourceTypes(): void {
+    this.resourceTypes = deepcopy<any>(this.parsedPipeline.resourceTypes);
   }
 
   private getOriginalJobs(): void {
@@ -120,6 +132,7 @@ export class JobTransformer {
   private finalizePipeline(resources: any, jobs: any, groups: any): any {
     let pipeline: any = {
       resources: resources,
+      resourceTypes: this.resourceTypes,
       jobs: jobs,
       groups: groups
     };
@@ -129,7 +142,10 @@ export class JobTransformer {
   private initGroups(): Array<any> {
     let groups: Array<any> = this.parsedPipeline.groups;
 
-    let branchesJobGroup: any = { name: this.BRANCHES_JOB_GROUP, jobs: [] };
+    let branchesJobGroup: any = {
+      name: this.BRANCHES_JOB_GROUP,
+      jobs: []
+    };
 
     groups.push(branchesJobGroup);
 
