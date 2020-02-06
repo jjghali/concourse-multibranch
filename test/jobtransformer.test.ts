@@ -7,10 +7,11 @@ describe("JobTransformer", () => {
   describe("generatePipeline", () => {
     it("should return the new pipeline", () => {
       let jbt: JobTransformer = new JobTransformer(
-        "template.pipeline.yml",
+        "poc-infra-multibranch.yml",
         "template",
+        "test",
         "TMQ",
-        "maah-code"
+        "git-demo"
       );
 
       console.log(YAML.stringify(jbt.generatePipeline(["branch1", "branch2"])));
