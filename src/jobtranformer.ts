@@ -44,13 +44,14 @@ export class JobTransformer {
     });
   }
 
-  private getGitResource(project: string, reposSlug: string, gitResourceName: string): void {
+  private getGitResource(
+    project: string,
+    reposSlug: string,
+    gitResourceName: string
+  ): void {
     this.originalGitResources = deepcopy<any>(this.parsedPipeline.resources);
     this.gitResource = this.parsedPipeline.resources.find((r: any) => {
-      return (
-        r.type == "git" &&
-        r.name == gitResourceName
-      );
+      return r.type == "git" && r.name == gitResourceName;
     });
   }
 
@@ -149,6 +150,13 @@ export class JobTransformer {
       let gitResourceName: string = "git_" + branch;
       tempJob.name = "job_" + branch;
       tempJob = this.replace(this.gitResource.name, gitResourceName, tempJob);
+
+      let sJobTemplate = JSON.stringify(tempJob);
+      while (sJobTemplate.includes(this.gitResource.name)) {
+        sJobTemplate.replace(this.gitResource.name, gitResourceName);
+      }
+
+      tempJob = JSON.parse(sJobTemplate);
 
       let tempJobPlanIdx = tempJob.plan.findIndex((p: any) => {
         return p.get == this.gitResource.name;

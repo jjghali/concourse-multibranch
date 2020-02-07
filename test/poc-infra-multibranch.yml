@@ -1,0 +1,139 @@
+resource_types:
+  - name: concourse-pipeline
+    source:
+      repository: concourse/concourse-pipeline-resource
+    type: docker-image
+groups:
+  - jobs:
+      - concourse-multi-branch
+      - template
+    name: devops
+  - jobs:
+      - job_master
+      - job_feature/demo2
+      - job_feature/demo1
+    name: branchesJobs
+jobs:
+  - name: template
+    plan:
+      - get: git-demo
+      - get: git-concourse
+      - file: git-concourse/04_tasks/maven-build/maven-build.yml
+        input_mapping:
+          git: git-demo
+        task: maven-build
+    serial: true
+  - name: concourse-multi-branch
+    plan:
+      - get: git-concourse
+      - get: my-pipelines
+      - config:
+          container_limits: {}
+          image_resource:
+            source:
+              repository: emeraldsquad/cf-cli
+            type: docker-image
+          inputs:
+            - name: my-pipelines
+          outputs:
+            - name: pipelines
+          platform: linux
+          run:
+            args:
+              - -c
+              - |
+                set +x
+                pwd
+                ls -ltra
+                find .
+                mv ./my-pipelines/desjardins-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
+            path: bash
+        task: scan-pipeline
+      - file: git-concourse/04_tasks/infra-multibranch/infra-multibranch.yml
+        input_mapping:
+          pipelines: pipelines
+        output_mapping:
+          result: pipeline_generated
+        params:
+          COMPONENT_NAME: demo-application-java
+          PRODUCT_NAME: desjardins-digital
+        task: infra-multibranch
+      - params:
+          pipelines:
+            - config_file: pipeline_generated/pipeline-generated.yml
+              name: poc-infra-multibranch
+              team: desjardins-digital-poc
+        put: my-pipelines
+    serial: true
+  - name: job_master
+    plan:
+      - get: git_master
+      - get: git-concourse
+      - file: git-concourse/04_tasks/maven-build/maven-build.yml
+        input_mapping:
+          git: git_master
+        task: maven-build
+    serial: true
+  - name: job_feature/demo2
+    plan:
+      - get: git_feature/demo2
+      - get: git-concourse
+      - file: git-concourse/04_tasks/maven-build/maven-build.yml
+        input_mapping:
+          git: git_feature/demo2
+        task: maven-build
+    serial: true
+  - name: job_feature/demo1
+    plan:
+      - get: git_feature/demo1
+      - get: git-concourse
+      - file: git-concourse/04_tasks/maven-build/maven-build.yml
+        input_mapping:
+          git: git_feature/demo1
+        task: maven-build
+    serial: true
+resources:
+  - name: git-concourse
+    source:
+      branch: feature/infra-multibranch
+      private_key: ((git-key))
+      uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/concourse.git
+    type: git
+  - check_every: 30m
+    name: git-demo
+    source:
+      branch: master
+      private_key: ((git-key))
+      uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/demo-application-java.git
+    type: git
+  - check_every: 30m
+    name: git_feature/demo1
+    source:
+      branch: feature/demo1
+      private_key: ((git-key))
+      uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/demo-application-java.git
+    type: git
+  - check_every: 30m
+    name: git_feature/demo2
+    source:
+      branch: feature/demo2
+      private_key: ((git-key))
+      uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/demo-application-java.git
+    type: git
+  - check_every: 30m
+    name: git_master
+    source:
+      branch: master
+      private_key: ((git-key))
+      uri: ssh://git@git.cfzcea.dev.desjardins.com:7999/desjardins-digital/demo-application-java.git
+    type: git
+  - icon: pipe
+    name: my-pipelines
+    source:
+      insecure: "false"
+      target: https://ci.cfzcea.dev.desjardins.com
+      teams:
+        - name: desjardins-digital-poc
+          password: ((concourse-basic-auth-password))
+          username: desjardins-digital-poc
+    type: concourse-pipeline
