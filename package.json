@@ -34,7 +34,7 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
-    "ansi-escapes": "^4.3.0",
+    "ansi-escapes": "^4.3.1",
     "axios": "^0.19.1",
     "chalk": "^3.0.0",
     "child-process-promise": "^2.2.1",
