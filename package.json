@@ -41,7 +41,7 @@
     "commander": "^4.1.0",
     "core-js": "^3.6.4",
     "dotenv": "^8.2.0",
-    "fs": "0.0.1-security",
+    "fs": "0.0.2",
     "fs-extra": "^8.1.0",
     "spawn-promise": "^0.1.8",
     "ts-deepcopy": "^0.1.4",
