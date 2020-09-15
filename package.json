@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "lint": "npx -- tslint --project tsconfig.json",
     "start": "nodemon --exec ts-node -- src/index.ts",
     "debug": "node --inspect dist/index.js --debug-port=9229 hello-world",
     "ts-node": "ts-node src/index.ts",
@@ -28,7 +29,7 @@
     "dts-generator": "^3.0.0",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
-    "ts-node": "^8.5.4",
+    "ts-node": "^8.10.2",
     "tsc-watch": "^4.0.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.4"
@@ -43,6 +44,7 @@
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "fs-extra": "^8.1.0",
+    "print-tools-js": "^1.2.0",
     "spawn-promise": "^0.1.8",
     "ts-deepcopy": "^0.1.4",
     "yaml": "^1.7.2"

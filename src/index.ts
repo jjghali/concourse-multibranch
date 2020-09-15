@@ -37,6 +37,7 @@ program
   .option("-g,--git-provider <provider>", "bitbucketServer")
   .option("--git-url <url>", "")
   .option("-q,--quiet", "No output on console")
+  .option("--regex <regex>", "")
   .requiredOption("-P,--project <project>", "project name")
   .requiredOption("-r,--repo-slug <repo-slug>", "Name of the repository")
   .action((opts: any) => {
@@ -44,7 +45,7 @@ program
       let bbCredentials: any;
 
       if (opts.username == null && opts.password == null && !opts.quiet) {
-        printTool.warning("[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
+        printTool.info("No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
 
         bbCredentials = {
           username: process.env.BITBUCKET_USERNAME,
@@ -58,8 +59,8 @@ program
       }
 
       if (opts.gitProvider == null && !opts.quiet) {
-        printTool.warning(
-          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default.", printToolConfig);
+        printTool.info(
+          "No Git provider was specified in the arguments.Bitbucket Server will be used by default.", printToolConfig);
       }
 
       resolve(bbCredentials);
@@ -91,7 +92,13 @@ program
       }
 
       promise.then((branches: any) => {
+
         if (branches) {
+          if (opts.regex) {
+            const regex: RegExp = new RegExp(`${opts.regex}`);
+            branches = branches.filter((b: string) => { return b.match(regex) });
+          }
+
           branches.forEach((b: string) => {
             console.log(b);
           });
@@ -106,7 +113,7 @@ program
   .description("Generate pipelines")
   .option("-g,--git-provider <provider>", "bitbucketServer")
   .option("--git-url <url>", "")
-  .requiredOption("--git-resource", "resource name")
+  .requiredOption("--git-resource <resource>", "resource name")
   .option("-u,--username <username>", "username")
   .option("-p,--password <password>", "password")
   .option("-j,--template <template>", "Name of the template job")
@@ -115,6 +122,7 @@ program
   .option("-i,--pipeline-file <pipeline-file>", "Path of the YAML file.")
   .option("-O,--output-to-console", "Outputs the final YAML in the console")
   .option("-q,--quiet", "No output on console")
+  .option("--regex <regex>", "")
   .option(
     "-f,--output-filename <output-filename>",
     "Output filename for the created yaml file"
@@ -127,8 +135,8 @@ program
 
       if (opts.username == null && opts.password == null && !opts.quiet) {
 
-        printTool.warning(
-          "[Info] No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
+        printTool.info(
+          "No credentials specified in the arguments. BITBUCKET_USERNAME AND BITBUCKET_PASSWORD will be used instead.", printToolConfig);
         bbCredentials = {
           username: process.env.BITBUCKET_USERNAME,
           password: process.env.BITBUCKET_PASSWORD
@@ -141,8 +149,8 @@ program
       }
 
       if (opts.gitProvider == null && !opts.quiet) {
-        printTool.warning(
-          "[Info] No Git provider was specified in the arguments.Bitbucket Server will be used by default.",
+        printTool.info(
+          "No Git provider was specified in the arguments.Bitbucket Server will be used by default.",
           printToolConfig
         );
       }
@@ -177,7 +185,12 @@ program
       promise
         .then((branches: any) => {
           printTool.success("Branches retrieved successfully from repository.", printToolConfig);
-          printTool.info("We will be using the followin branches:", printToolConfig);
+          printTool.info("We will be using the following branches:", printToolConfig);
+
+          if (opts.regex) {
+            const regex: RegExp = new RegExp(`${opts.regex}`);
+            branches = branches.filter((b: string) => { return b.match(regex) });
+          }
 
           branches.forEach((b: string) => {
             printTool.bullet(b)
@@ -190,8 +203,6 @@ program
           let jobtranformer: JobTransformer = new JobTransformer(
             filePath,
             templateName,
-            opts.project,
-            opts.repoSlug,
             opts.gitResource
           );
 
