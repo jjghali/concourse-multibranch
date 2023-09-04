@@ -29,7 +29,7 @@ resources:
   source:
     uri: https://github.com/jjghali/concourse-multibranch.git
     username: jjghali
-***REMOVED***
+    password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
     branch: master
 
 jobs:

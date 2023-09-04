@@ -46,7 +46,7 @@ jobs:
                 pwd
                 ls -ltra
                 find .
-                mv ./my-pipelines/***REMOVED***-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
+                mv ./my-pipelines/my-company-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
             path: bash
         task: scan-pipeline
       - file: git-concourse/04_tasks/infra-multibranch/infra-multibranch.yml
@@ -56,13 +56,13 @@ jobs:
           result: pipeline_generated
         params:
           COMPONENT_NAME: demo-application-java
-          PRODUCT_NAME: ***REMOVED***-digital
+          PRODUCT_NAME: my-company-digital
         task: infra-multibranch
       - params:
           pipelines:
             - config_file: pipeline_generated/pipeline-generated.yml
               name: poc-infra-multibranch
-              team: ***REMOVED***-digital-poc
+              team: my-company-digital-poc
         put: my-pipelines
     serial: true
   - name: job_master
@@ -97,43 +97,43 @@ resources:
     source:
       branch: feature/infra-multibranch
       private_key: ((git-key))
-      uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/concourse.git
+      uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/concourse.git
     type: git
   - check_every: 30m
     name: git-demo
     source:
       branch: master
       private_key: ((git-key))
-      uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/demo-application-java.git
+      uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/demo-application-java.git
     type: git
   - check_every: 30m
     name: git_feature/demo1
     source:
       branch: feature/demo1
       private_key: ((git-key))
-      uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/demo-application-java.git
+      uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/demo-application-java.git
     type: git
   - check_every: 30m
     name: git_feature/demo2
     source:
       branch: feature/demo2
       private_key: ((git-key))
-      uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/demo-application-java.git
+      uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/demo-application-java.git
     type: git
   - check_every: 30m
     name: git_master
     source:
       branch: master
       private_key: ((git-key))
-      uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/demo-application-java.git
+      uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/demo-application-java.git
     type: git
   - icon: pipe
     name: my-pipelines
     source:
       insecure: "false"
-      target: https://ci.cfzcea.dev.***REMOVED***.com
+      target: https://ci.cfzcea.dev.my-company.com
       teams:
-        - name: ***REMOVED***-digital-poc
+        - name: my-company-digital-poc
           password: ((concourse-basic-auth-password))
-          username: ***REMOVED***-digital-poc
+          username: my-company-digital-poc
     type: concourse-pipeline

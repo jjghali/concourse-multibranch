@@ -7,16 +7,16 @@ resources:
     uri: https://github.com/jjghali/sga-backend.git
     branch: master    
     username: jjghali
-***REMOVED***
+    password: 76d09d8b28352cbf410f3c5359ce51ce173525b0
 
 - name: cloud-foundry
   type: cf
   source:
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
+    api: https://api.run.pivotal.io
+    username: jjghali@protonmail.ch
+    password: owTjUkhz3dEyUk8@*ht_
+    organization: opbox
+    space: development
 
 
 jobs:

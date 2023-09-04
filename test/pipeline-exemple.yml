@@ -12,26 +12,26 @@ resources:
   type: git
   check_every: 30m
   source:
-    uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/demo-application-java.git
+    uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/demo-application-java.git
     private_key: ((git-key))
 # Ressource GIT pour checkout le depot de resource infra
 - name: git-concourse
   type: git
   source:
     private_key: ((git-key))
-    uri: ssh://git@git.cfzcea.dev.***REMOVED***.com:7999/***REMOVED***-digital/concourse.git
+    uri: ssh://git@git.cfzcea.dev.my-company.com:7999/my-company-digital/concourse.git
     branch: feature/infra-multibranch
 # Set Pipelines
 - name: my-pipelines
   type: concourse-pipeline
   icon: pipe
   source:
-    target: https://ci.cfzcea.dev.***REMOVED***.com
+    target: https://ci.cfzcea.dev.my-company.com
     insecure: "false"
     teams:
-    - name: ***REMOVED***-digital-poc
+    - name: my-company-digital-poc
       password: ((concourse-basic-auth-password))
-      username: ***REMOVED***-digital-poc
+      username: my-company-digital-poc
       
 jobs:
 - name: template
@@ -71,7 +71,7 @@ jobs:
           pwd
           ls -ltra
           find .
-          mv ./my-pipelines/***REMOVED***-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
+          mv ./my-pipelines/my-company-digital-poc-poc-infra-multibranch.yml pipelines/original_pipeline.yml
   - task: infra-multibranch
     file: git-concourse/04_tasks/infra-multibranch/infra-multibranch.yml
     input_mapping:
@@ -80,12 +80,12 @@ jobs:
       result: pipeline_generated
     params: 
       COMPONENT_NAME: demo-application-java
-      PRODUCT_NAME: ***REMOVED***-digital
+      PRODUCT_NAME: my-company-digital
   - put: my-pipelines
     params:
       pipelines:
       - name: my-pipeline
-        team: ***REMOVED***-digital-poc
+        team: my-company-digital-poc
         config_file: pipeline_generated/pipeline-generated.yml
 
 groups:
